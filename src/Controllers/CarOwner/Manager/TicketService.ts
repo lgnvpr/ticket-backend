@@ -4,21 +4,15 @@ import { Car } from "../../../base-ticket/base-carOwner/Car";
 import { Paging } from "../../../base-ticket/Paging";
 import { MongoService } from "../../MongoService";
 
-const collection = "Car"
-export class CarService {
+const collection = "Ticket"
+export class TicketService {
     public static async list(params: any): Promise<any> {
         var getData: any = await MongoService._list(collection, params,params.page);
         return ResReturn.returnData(getData);
     }
 
     public static async create(params : any ): Promise<any>{
-        let car : Car = params;
-        
-        if(!car.entryAt || !car.licensePlates || !car.name || !car.typeCarId  ){
-            return  ResReturn.returnError("Nhập đầy đủ thông tin ");
-        }
-        
-        
+
         var getData: any = await MongoService._create(collection, params);
         return ResReturn.returnData(getData);
     }

@@ -5,16 +5,23 @@ import { CarService } from '../../Controllers/CarOwner/Manager/CarService';
 const LoginCarOwnerRouter = express.Router();
 
 
-LoginCarOwnerRouter.get("/", async (req: express.Request, res: express.Response) => {
-    res.json( await CarService.get(req.body));
+LoginCarOwnerRouter.post("/login", async (req: express.Request, res: express.Response) => {
+    let getRes = await CarService.list(req.body)
+    res.status = getRes.status;
+    res.json(getRes.json);
+
 })
 
-LoginCarOwnerRouter.post("/", async(req: express.Request, res: express.Response) => {
-    res.json(await CarService.create(req.body))
+LoginCarOwnerRouter.put("/", async(req: express.Request, res: express.Response) => {
+    let getRes = await CarService.create(req.body)
+    res.status = getRes.status;
+    res.json(getRes.json);
 })
 
-LoginCarOwnerRouter.delete("/", async(req: express.Request, res: express.Response)=>{
-    res.json(await CarService.delete(req.body));
+LoginCarOwnerRouter.post("/", async(req: express.Request, res: express.Response)=>{
+    let getRes = await CarService.delete(req.body)
+    res.status = getRes.status;
+    res.json(getRes.json);
 })
 
 
