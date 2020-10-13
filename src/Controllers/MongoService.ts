@@ -10,10 +10,15 @@ export class MongoService {
 
     public static async _get(collection: string, params: any): Promise<any> {
         //    return  await this.getField(collection,"viTriDatSach","D5");
-
+        console.log(`==========${collection}===========`)
+        console.log(params)
         if (params && params._id) {
+            let _id = params._id;
+            try {
+                _id = new mongo.ObjectID(params._id);
+            } catch {
 
-            let _id = new mongo.ObjectID(params._id);
+            }
             return await this.collection(collection).find({
                 $or: [
                     params,
@@ -22,10 +27,20 @@ export class MongoService {
             }).toArray();
         }
         if (Array.isArray(params)) {
+
+            let _ids: any = params.map((_id: any) => {
+                try {
+                    return new mongo.ObjectID(_id);
+                } catch (error) {
+                    return _id
+                }
+            })
+
+            console.log(_ids)
+
             return await this.collection(collection).find({
                 $and: [
-                    { _id: { $in: params } },
-                    { status: "active" }
+                    { _id: { $in: _ids } }
                 ]
             }).toArray();
         }
@@ -38,13 +53,15 @@ export class MongoService {
             getListData = await this.collection(collection).find({ _id: { $in: params } }).limit(10).skip((page - 1) * 10).toArray();
         }
         else {
-            getListData = await this.collection(collection).find({ status: "active" }).limit(10).skip((page - 1) * 10).toArray();
-
+            if (page) {
+                getListData = await this.collection(collection).find({ status: "active" }).limit(10).skip((page - 1) * 10).toArray();
+            }
+            else {
+                getListData = await this.collection(collection).find({ status: "active" }).toArray();
+            }
         }
 
         return this.setPaging(collection, page, getListData);
-
-
     }
 
     public static async setPaging(collection, page, T: Array<any>): Promise<Paging<any>> {
@@ -71,9 +88,9 @@ export class MongoService {
     }
 
 
-    public static async getByQuery(collection: string, query: any): Promise<any> {
+    public static async _getByQuery(collection: string, query: any): Promise<any> {
         //    return  await this.getField(collection,"viTriDatSach","D5");
-        return await this.collection(collection).find({ query }).toArray();
+        return await this.collection(collection).find(query).toArray();
     }
 
 
@@ -91,15 +108,31 @@ export class MongoService {
 
 
     public static async _create(collection, params): Promise<any> {
-        let customParams = { ...params, status: "active", updateAt: new Date() }
-        if (customParams._id) {
-            let checkCreate = await this._get(collection, { _id: customParams._id });
-            if (checkCreate.length > 0)
-                return this.collection(collection).updateMany({ _id: customParams._id }, {
-                    $set: customParams
-                })
-                    .then(res => res)
+        let customParams: any = { ...params, status: "active", updateAt: new Date() }
+        delete customParams._id;
+        if (params._id) {
+            let _id = "";
+            try {
+                _id = new mongo.ObjectID(params._id);
+            } catch (error) {
+
+            }
+            let checkCreate = await this._get(collection, { _id: params._id });
+            if (checkCreate.length > 0) {
+                console.log("on check");
+                console.log(customParams)
+                return this.collection(collection).updateMany({
+                    $or: [
+                        { _id: _id },
+                        { _id: params._id }
+                    ]
+                },
+                    {
+                        $set: customParams
+                    }).then(res => res)
                     .catch(err => err)
+            }
+
         }
         customParams.createAt = new Date();
         return this.collection(collection).insert(customParams)
@@ -116,11 +149,18 @@ export class MongoService {
     }
 
     public static setInActive(collection, id: string): Promise<any> {
-        let _id = new mongo.ObjectID(id);
-        return this.collection(collection).updateMany({ $or: [
-            {_id : id},
-            { _id: _id }
-        ] }, {
+        let _id = "";
+        try {
+            _id = new mongo.ObjectID(id);
+        } catch {
+
+        }
+        return this.collection(collection).updateMany({
+            $or: [
+                { _id: id },
+                { _id: _id }
+            ]
+        }, {
             $set: { status: 'inactive', updateAt: new Date() }
         })
             .then(res => res.result)

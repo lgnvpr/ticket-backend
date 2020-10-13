@@ -6,6 +6,7 @@ import { ChairService } from '../../Controllers/CarOwner/Manager/ChairService';
 import { CustomerService } from '../../Controllers/CarOwner/Manager/CustomerService';
 import { PostionStaffService } from '../../Controllers/CarOwner/Manager/PostionStaffService';
 import { StaffService } from '../../Controllers/CarOwner/Manager/StaffService';
+import { TicketService } from '../../Controllers/CarOwner/Manager/TicketService';
 import { TripCarService } from '../../Controllers/CarOwner/Manager/TripCarService';
 import { TypeCarService } from '../../Controllers/CarOwner/Manager/TypeCarService';
 
@@ -34,6 +35,7 @@ ManagerOwnerRouter.get("/car/:id", async (req: express.Request, res: express.Res
     res.status(getRes.status);
     res.json(getRes.json);
 })
+
 //quản lí loại xe
 
 
@@ -83,10 +85,27 @@ ManagerOwnerRouter.get("/ChairCar/:id", async (req: express.Request, res: expres
     res.status(getRes.status);
     res.json(getRes.json);
 })
+
+
+ManagerOwnerRouter.get("/ChairCar/getByCarId/:id", async (req: express.Request, res: express.Response)=>{
+    let getRes = await ChairService.getByCarId({carId : req.params.id})
+    res.status(getRes.status);
+    res.json(getRes.json);
+})
+
+
 //quản lí nhân viên
 
+ManagerOwnerRouter.get("/staff/page=:page", async (req: express.Request, res: express.Response) => {
+
+    let getRes = await StaffService.list(req.body, req.params.page)
+    res.status(getRes.status)
+    res.json(getRes.json);
+})
+
 ManagerOwnerRouter.get("/staff", async (req: express.Request, res: express.Response) => {
-    let getRes = await StaffService.list(req.body)
+
+    let getRes = await StaffService.list(req.body, req.query.page)
     res.status(getRes.status)
     res.json(getRes.json);
 })
@@ -186,24 +205,24 @@ ManagerOwnerRouter.get("/trip/:id", async (req: express.Request, res: express.Re
 
 //Vé xe
 ManagerOwnerRouter.get("/ticket", async (req: express.Request, res: express.Response) => {
-    let getRes = await TripCarService.list(req.body)
+    let getRes = await TicketService.list(req.body)
     res.status(getRes.status)
     res.json(getRes.json);
 })
 
 ManagerOwnerRouter.post("/ticket", async(req: express.Request, res: express.Response) => {
-    let getRes = await TripCarService.create(req.body)
+    let getRes = await TicketService.create(req.body)
     res.status(getRes.status);
     res.json(getRes.json);
 })
 
 ManagerOwnerRouter.delete("/ticket", async(req: express.Request, res: express.Response)=>{
-    let getRes = await TripCarService.delete(req.body)
+    let getRes = await TicketService.delete(req.body)
     res.status(getRes.status);
     res.json(getRes.json);
 })
 ManagerOwnerRouter.get("/ticket/:id", async (req: express.Request, res: express.Response)=>{
-    let getRes = await TripCarService.getById({_id : req.params.id})
+    let getRes = await TicketService.getById({_id : req.params.id})
     res.status(getRes.status);
     res.json(getRes.json);
 })

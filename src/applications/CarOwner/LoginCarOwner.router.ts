@@ -12,17 +12,6 @@ LoginCarOwnerRouter.post("/login", async (req: express.Request, res: express.Res
 
 })
 
-LoginCarOwnerRouter.put("/", async(req: express.Request, res: express.Response) => {
-    let getRes = await CarService.create(req.body)
-    res.status = getRes.status;
-    res.json(getRes.json);
-})
-
-LoginCarOwnerRouter.post("/", async(req: express.Request, res: express.Response)=>{
-    let getRes = await CarService.delete(req.body)
-    res.status = getRes.status;
-    res.json(getRes.json);
-})
 
 
 

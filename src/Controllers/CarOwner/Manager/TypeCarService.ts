@@ -8,6 +8,8 @@ const collection = "TypeCar"
 export class TypeCarService {
     public static async list(params: any): Promise<any> {
         var getData: any = await MongoService._list(collection, params,params.page);
+
+        
         return ResReturn.returnData(getData);
     }
 
