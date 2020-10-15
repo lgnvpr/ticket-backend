@@ -108,6 +108,20 @@ export class MongoService {
 
 
     public static async _create(collection, params): Promise<any> {
+        if(Array.isArray(params)){
+            params.map((params)=>{
+                params.status = "active",
+                params.createAt = new Date();
+                params.updateAt = new Date();
+                return params;
+            })
+            return this.collection(collection).insertMany(params)
+            .then(res => res)
+            .catch(err => err);
+
+
+        }
+
         let customParams: any = { ...params, status: "active", updateAt: new Date() }
         delete customParams._id;
         if (params._id) {
@@ -119,8 +133,6 @@ export class MongoService {
             }
             let checkCreate = await this._get(collection, { _id: params._id });
             if (checkCreate.length > 0) {
-                console.log("on check");
-                console.log(customParams)
                 return this.collection(collection).updateMany({
                     $or: [
                         { _id: _id },
@@ -132,7 +144,6 @@ export class MongoService {
                     }).then(res => res)
                     .catch(err => err)
             }
-
         }
         customParams.createAt = new Date();
         return this.collection(collection).insert(customParams)

@@ -75,6 +75,12 @@ ManagerOwnerRouter.post("/ChairCar", async(req: express.Request, res: express.Re
     res.json(getRes.json);
 })
 
+ManagerOwnerRouter.post("/ChairCar/autoCreate", async(req: express.Request, res: express.Response) => {
+    let getRes = await ChairService.autoCreate(req.body)
+    res.status(getRes.status);
+    res.json(getRes.json);
+})
+
 ManagerOwnerRouter.delete("/ChairCar", async(req: express.Request, res: express.Response)=>{
     let getRes = await ChairService.delete(req.body)
     res.status(getRes.status);

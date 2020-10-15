@@ -5,7 +5,7 @@ import { Paging } from "../../../base-ticket/Paging";
 import { MongoService } from "../../MongoService";
 
 const collection = "account"
-export class TypeCarService {
+export class AccountService {
     public static async list(params: any): Promise<any> {
         var getData: any = await MongoService._list(collection, params, params.page);
         return ResReturn.returnData(getData);
@@ -32,8 +32,9 @@ export class TypeCarService {
     public static async login(params: any): Promise<any> {
         var user: any = params.username;
         var password: any = params.password;
+        // return ResReturn.returnData(params);
         if (user == "admin" && password == "admin") {
-            return ResReturn.returnData("vanluongahihi");
+            return ResReturn.returnData(user);
         }
         return ResReturn.returnError("Password or User incorrect");
 
