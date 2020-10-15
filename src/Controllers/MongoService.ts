@@ -1,6 +1,7 @@
 import { isForOfStatement } from '../../node_modules/typescript/lib/typescript';
 import { MongoHelper } from '../mongo.helper'
 import { Paging } from "../base-ticket/Paging"
+import { parse } from '../../node_modules/ts-node/dist/index';
 var mongo = require('mongodb');
 export class MongoService {
 
@@ -48,14 +49,34 @@ export class MongoService {
     }
 
     public static async _list(collection: string, params: any, page: number): Promise<any> {
+        console.log("================oarams==================")
+        console.log(params)
         let getListData: [] = [];
         if (Array.isArray(params)) {
             getListData = await this.collection(collection).find({ _id: { $in: params } }).limit(10).skip((page - 1) * 10).toArray();
         }
         else {
-            if (page) {
+            if (params.query) {
+                console.log("on Query with Query and page")
+                let syntaxQuery = params.query;
+                if(typeof syntaxQuery ==  "string"){
+                    
+                    
+                    syntaxQuery = JSON.parse(params.query);
+                }
+                console.log(syntaxQuery)
+                // let TestQuery = {CarId : "5f87b88fd9f4e818f35622"}
+                // console.log(TestQuery);
+                getListData = await this.collection(collection).find({
+                    $and: [syntaxQuery,{status: "active"}
+                    ]
+                }).limit(10).skip((page - 1) * 10).toArray();
+            }
+            else if (page) {
+                console.log("on Query with page")
                 getListData = await this.collection(collection).find({ status: "active" }).limit(10).skip((page - 1) * 10).toArray();
             }
+
             else {
                 getListData = await this.collection(collection).find({ status: "active" }).toArray();
             }
@@ -108,16 +129,16 @@ export class MongoService {
 
 
     public static async _create(collection, params): Promise<any> {
-        if(Array.isArray(params)){
-            params.map((params)=>{
+        if (Array.isArray(params)) {
+            params.map((params) => {
                 params.status = "active",
-                params.createAt = new Date();
+                    params.createAt = new Date();
                 params.updateAt = new Date();
                 return params;
             })
             return this.collection(collection).insertMany(params)
-            .then(res => res)
-            .catch(err => err);
+                .then(res => res)
+                .catch(err => err);
 
 
         }

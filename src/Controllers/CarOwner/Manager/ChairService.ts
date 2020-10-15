@@ -64,7 +64,7 @@ export class ChairService {
         var getData: any = await MongoService._create(collection, listChair);
         return ResReturn.returnData(getData);
 
-        return ResReturn.returnData(listChair);
+        // return ResReturn.returnData(listChair);
 
     }
 
@@ -96,8 +96,6 @@ export class ChairService {
         })
         floor = floor.filter(function (el) { return el != null && el != ''; });
         row = row.filter(function (el) { return el != null && el != ''; });
-
-
         floor = floor.filter((value, index, self) =>{
             return self.indexOf(value) === index;
         });
