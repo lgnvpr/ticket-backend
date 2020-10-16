@@ -21,5 +21,9 @@ export default class ResReturn{
         return res;
     } 
 
+    public static getDataRes(data : any ) : any{
+        return data.json;
+    }
+
     
 }

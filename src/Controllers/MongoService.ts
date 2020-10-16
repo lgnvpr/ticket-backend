@@ -11,15 +11,11 @@ export class MongoService {
 
     public static async _get(collection: string, params: any): Promise<any> {
         //    return  await this.getField(collection,"viTriDatSach","D5");
-        console.log(`==========${collection}===========`)
-        console.log(params)
-        if (params && params._id) {
-            let _id = params._id;
-            try {
-                _id = new mongo.ObjectID(params._id);
-            } catch {
+        console.log("\x1b[31m", `============Create for ${collection}====================`);
 
-            }
+        if (params && params._id) {
+            let _id = this.convertIdToIdObject(params._id);
+
             return await this.collection(collection).find({
                 $or: [
                     params,
@@ -30,15 +26,8 @@ export class MongoService {
         if (Array.isArray(params)) {
 
             let _ids: any = params.map((_id: any) => {
-                try {
-                    return new mongo.ObjectID(_id);
-                } catch (error) {
-                    return _id
-                }
+                return this.convertIdToIdObject(_id);
             })
-
-            console.log(_ids)
-
             return await this.collection(collection).find({
                 $and: [
                     { _id: { $in: _ids } }
@@ -48,42 +37,44 @@ export class MongoService {
         return await this.collection(collection).find({ status: "active" }).toArray();
     }
 
-    public static async _list(collection: string, params: any, page: number): Promise<any> {
-        console.log("================oarams==================")
-        console.log(params)
+    public static async _list(collection: string, params: any): Promise<any> {
+        console.log("\x1b[31m", `============list for ${collection}====================`);
+        let page :number= parseInt(params.page)||0
         let getListData: [] = [];
-        if (Array.isArray(params)) {
-            getListData = await this.collection(collection).find({ _id: { $in: params } }).limit(10).skip((page - 1) * 10).toArray();
-        }
-        else {
-            if (params.query) {
-                console.log("on Query with Query and page")
-                let syntaxQuery = params.query;
-                if(typeof syntaxQuery ==  "string"){
-                    
-                    
-                    syntaxQuery = JSON.parse(params.query);
-                }
-                console.log(syntaxQuery)
-                // let TestQuery = {CarId : "5f87b88fd9f4e818f35622"}
-                // console.log(TestQuery);
-                getListData = await this.collection(collection).find({
-                    $and: [syntaxQuery,{status: "active"}
-                    ]
-                }).limit(10).skip((page - 1) * 10).toArray();
-            }
-            else if (page) {
-                console.log("on Query with page")
-                getListData = await this.collection(collection).find({ status: "active" }).limit(10).skip((page - 1) * 10).toArray();
+
+        if (params.query) {
+            console.log("on Query with Query and page")
+            let syntaxQuery = params.query;
+            if (typeof syntaxQuery == "string") {
+                syntaxQuery = JSON.parse(params.query);
             }
 
-            else {
-                getListData = await this.collection(collection).find({ status: "active" }).toArray();
+            if (page) {
+                getListData = await this.collection(collection).find({
+                    $and: [syntaxQuery, { status: "active" }
+                    ]
+                }).limit(10).skip((page - 1) * 10).toArray();
+            } else {
+                getListData = await this.collection(collection).find({
+                    $and: [syntaxQuery, { status: "active" }
+                    ]
+                }).toArray();
             }
         }
+        else if (page) {
+            console.log(params)
+            getListData = await this.collection(collection).find({ status: "active" }).limit(10).skip((page - 1) * 10).toArray();
+        }
+
+        else {
+            console.log("on Query  page")
+            getListData = await this.collection(collection).find({ status: "active" }).toArray();
+        }
+
 
         return this.setPaging(collection, page, getListData);
     }
+
 
     public static async setPaging(collection, page, T: Array<any>): Promise<Paging<any>> {
         let getCount = await this.getPaging(collection);
@@ -110,25 +101,14 @@ export class MongoService {
 
 
     public static async _getByQuery(collection: string, query: any): Promise<any> {
-        //    return  await this.getField(collection,"viTriDatSach","D5");
         return await this.collection(collection).find(query).toArray();
     }
 
 
-    // public static async getField(collection, field, value): Promise<any> {
-    //     if (Array.isArray(value)) {
-    //         const syntax = `{
-    //             ${field}: { $in: ${value} }
-    //         }`;
-    //         return await this.collection(collection).find(syntax).toArray();
-    //     } else if (typeof value === "string") {
-    //         const syntax = `{"${field}": "${value}"}`
-    //         return this.collection(collection).find(syntax).toArray();
-    //     }
-    // }
 
 
     public static async _create(collection, params): Promise<any> {
+        console.log("\x1b[31m", `============Create for ${collection}====================`);
         if (Array.isArray(params)) {
             params.map((params) => {
                 params.status = "active",
@@ -139,19 +119,11 @@ export class MongoService {
             return this.collection(collection).insertMany(params)
                 .then(res => res)
                 .catch(err => err);
-
-
         }
-
         let customParams: any = { ...params, status: "active", updateAt: new Date() }
         delete customParams._id;
         if (params._id) {
-            let _id = "";
-            try {
-                _id = new mongo.ObjectID(params._id);
-            } catch (error) {
-
-            }
+            let _id = this.convertIdToIdObject(params._id);
             let checkCreate = await this._get(collection, { _id: params._id });
             if (checkCreate.length > 0) {
                 return this.collection(collection).updateMany({
@@ -181,12 +153,7 @@ export class MongoService {
     }
 
     public static setInActive(collection, id: string): Promise<any> {
-        let _id = "";
-        try {
-            _id = new mongo.ObjectID(id);
-        } catch {
-
-        }
+        let _id = this.convertIdToIdObject(id);
         return this.collection(collection).updateMany({
             $or: [
                 { _id: id },
@@ -197,6 +164,22 @@ export class MongoService {
         })
             .then(res => res.result)
             .catch(err => err)
+    }
+
+    public static convertIdToIdObject(id: string): any {
+        try {
+            return new mongo.ObjectID(id);
+        } catch (error) {
+            return id;
+        }
+    }
+
+    public static createQueryForListId(arr: Array<any>): any {
+        return {
+            $and: [
+                { _id: { $in: arr } }
+            ]
+        }
     }
 
 

@@ -8,8 +8,8 @@ import { MongoService } from "../../MongoService";
 
 const collection = "Staff"
 export class StaffService {
-    public static async list(params: any, page : any): Promise<any> {
-        var getData: Paging<Staff> = await MongoService._list(collection, params,page);
+    public static async list(params: any): Promise<any> {
+        var getData: Paging<Staff> = await MongoService._list(collection, params);
         var postionStaffIds : Array<string> =  getData.rows.map((staff : Staff)=> staff.positionId); 
         
         var getPostionStaff: any = await MongoService._get("PostionStaff", postionStaffIds);

@@ -15,7 +15,7 @@ const ManagerOwnerRouter = express.Router();
 
 //quản lí xe
 ManagerOwnerRouter.get("/car", async (req: express.Request, res: express.Response) => {
-    let getRes = await CarService.list(req.body)
+    let getRes = await CarService.list(req.query)
     res.status(getRes.status)
     res.json(getRes.json);
 })
@@ -41,7 +41,7 @@ ManagerOwnerRouter.get("/car/:id", async (req: express.Request, res: express.Res
 
 
 ManagerOwnerRouter.get("/typeCar", async (req: express.Request, res: express.Response) => {
-    let getRes = await TypeCarService.list(req.body)
+    let getRes = await TypeCarService.list(req.query)
     res.status(getRes.status)
     res.json(getRes.json);
 })
@@ -65,7 +65,7 @@ ManagerOwnerRouter.get("/typeCar/:id", async (req: express.Request, res: express
 
 //quản lí ghế
 ManagerOwnerRouter.get("/ChairCar", async (req: express.Request, res: express.Response) => {
-    let getRes = await ChairService.list(req.body)
+    let getRes = await ChairService.list(req.query)
     res.status(getRes.status)
     res.json(getRes.json);
 })
@@ -103,16 +103,11 @@ ManagerOwnerRouter.get("/ChairCar/getByCarId/:id", async (req: express.Request, 
 
 //quản lí nhân viên
 
-ManagerOwnerRouter.get("/staff/page=:page", async (req: express.Request, res: express.Response) => {
 
-    let getRes = await StaffService.list(req.body, req.params.page)
-    res.status(getRes.status)
-    res.json(getRes.json);
-})
 
 ManagerOwnerRouter.get("/staff", async (req: express.Request, res: express.Response) => {
 
-    let getRes = await StaffService.list(req.body, req.query.page)
+    let getRes = await StaffService.list(req.query.page)
     res.status(getRes.status)
     res.json(getRes.json);
 })
@@ -138,7 +133,7 @@ ManagerOwnerRouter.get("/staff/:id", async (req: express.Request, res: express.R
 
 
 ManagerOwnerRouter.get("/positionStaff", async (req: express.Request, res: express.Response) => {
-    let getRes = await PostionStaffService.list(req.body)
+    let getRes = await PostionStaffService.list(req.query)
     res.status(getRes.status)
     res.json(getRes.json);
 })
@@ -163,7 +158,7 @@ ManagerOwnerRouter.get("/positionStaff/:id", async (req: express.Request, res: e
 // khách hàng
 
 ManagerOwnerRouter.get("/customer", async (req: express.Request, res: express.Response) => {
-    let getRes = await CustomerService.list(req.body)
+    let getRes = await CustomerService.list(req.query)
     res.status(getRes.status)
     res.json(getRes.json);
 })
@@ -188,7 +183,7 @@ ManagerOwnerRouter.get("/customer/:id", async (req: express.Request, res: expres
 
 //lộ trình
 ManagerOwnerRouter.get("/route", async (req: express.Request, res: express.Response) => {
-    let getRes = await RouteCarService.list(req.body)
+    let getRes = await RouteCarService.list(req.query)
     res.status(getRes.status)
     res.json(getRes.json);
 })
@@ -212,7 +207,7 @@ ManagerOwnerRouter.get("/route/:id", async (req: express.Request, res: express.R
 
 //Vé xe
 ManagerOwnerRouter.get("/ticket", async (req: express.Request, res: express.Response) => {
-    let getRes = await TicketService.list(req.body)
+    let getRes = await TicketService.list(req.query)
     res.status(getRes.status)
     res.json(getRes.json);
 })
@@ -236,8 +231,6 @@ ManagerOwnerRouter.get("/ticket/:id", async (req: express.Request, res: express.
 //quản lí lộ trình 
 
 ManagerOwnerRouter.get("/trip", async (req: express.Request, res: express.Response) => {
-    console.log("===============req.body======================")
-    console.log(req.query);
     let getRes = await TripCarService.list(req.query)
     res.status(getRes.status)
     res.json(getRes.json);

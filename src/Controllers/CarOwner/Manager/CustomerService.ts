@@ -7,7 +7,7 @@ import { MongoService } from "../../MongoService";
 const collection = "Customer"
 export class CustomerService {
     public static async list(params: any): Promise<any> {
-        var getData: any = await MongoService._list(collection, params,params.page);
+        var getData: any = await MongoService._list(collection, params);
         return ResReturn.returnData(getData);
     }
 

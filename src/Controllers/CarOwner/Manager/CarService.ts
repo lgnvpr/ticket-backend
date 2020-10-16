@@ -8,7 +8,7 @@ import { MongoService } from "../../MongoService";
 const collection = "Car"
 export class CarService {
     public static async list(params: any): Promise<any> {
-        var getData: Paging<Car> = await MongoService._list(collection, params,params.page);
+        var getData: Paging<Car> = await MongoService._list(collection, params);
         let typeCarIds = getData.rows.map((car : Car)=>{
             return car.typeCarId
         })
@@ -19,14 +19,9 @@ export class CarService {
         })
         return ResReturn.returnData(getData);
     }
-
+    
     public static async create(params : any ): Promise<any>{
-        let car : Car = params;
-        // if(!car.entryAt || !car.licensePlates || !car.name || !car.typeCarId  ){
-        //     return  ResReturn.returnError("Nhập đầy đủ thông tin ");
-        // }
-        
-        
+        let car : Car = params;   
         var getData: any = await MongoService._create(collection, car);
         return ResReturn.returnData(getData);
     }

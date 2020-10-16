@@ -1,6 +1,7 @@
 import { get } from "mongoose";
 import ResReturn from "../../../applications/ResReturn";
 import { Car } from "../../../base-ticket/base-carOwner/Car";
+import { Route } from "../../../base-ticket/base-carOwner/Route";
 import { Staff } from "../../../base-ticket/base-carOwner/Staff";
 import { Trip } from "../../../base-ticket/base-carOwner/Trip";
 import { Paging } from "../../../base-ticket/Paging";
@@ -9,7 +10,7 @@ import { MongoService } from "../../MongoService";
 const collection = "Route"
 export class RouteCarService {
     public static async list(params: any): Promise<any> {
-        var getData: Paging<Trip> = await MongoService._list(collection, params,params.page);
+        var getData: Paging<Route> = await MongoService._list(collection, params);
         // let carIds = getData.rows.map((trip : Trip )=>{
         //     return trip._id
         // });

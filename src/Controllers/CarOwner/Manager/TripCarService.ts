@@ -6,38 +6,45 @@ import { Staff } from "../../../base-ticket/base-carOwner/Staff";
 import { Trip } from "../../../base-ticket/base-carOwner/Trip";
 import { Paging } from "../../../base-ticket/Paging";
 import { MongoService } from "../../MongoService";
+import { CarService } from "./CarService";
 
 const collection = "Trip"
 export class TripCarService {
     public static async list(params: any): Promise<any> {
-        
-        var getData: Paging<Trip> = await MongoService._list(collection, params, params.page);
+        var getData: Paging<Trip> = await MongoService._list(collection, params);
         let carIds = getData.rows.map((trip: Trip) => {
-            return trip._id
+            return MongoService.convertIdToIdObject(trip.CarId);
         });
 
-
+        let createQuery = {
+            page : null, 
+            query : MongoService.createQueryForListId(carIds)
+        }
         let driveIds = getData.rows.map((trip: Trip) => {
             return trip.driveId
         });
+
         let routeIds = getData.rows.map((trip: Trip) => {
             return trip.RouteId
         })
 
+        let car =await  ResReturn.getDataRes(await CarService.list(createQuery));
+        // return ResReturn.returnData(car);
+        // return ResReturn.getDataRes(ResReturn.returnData(car));
         let drive = await MongoService._get("Staff", [...driveIds])
         let route = await MongoService._get("Route", [...routeIds])
-
         getData.rows.map((trip: Trip) => {
             trip.drive = drive.find((staff: Staff) => trip.driveId == staff._id);
             trip.Route = route.find((route: Route) => trip.RouteId == route._id);
+            trip.Car = car.rows.find((car: Car) => trip.CarId == car._id);
             return trip;
         })
-
+        // console.log(get))
         return ResReturn.returnData(getData);
     }
 
     public static async listByCarId(params: any): Promise<any> {
-        var getData: Paging<Trip> = await MongoService._getByQuery(collection, {CarId : params.carId});
+        var getData: Paging<Trip> = await MongoService._getByQuery(collection, { CarId: params.carId });
         let carIds = getData.rows.map((trip: Trip) => {
             return trip._id
         });
