@@ -107,7 +107,7 @@ ManagerOwnerRouter.get("/ChairCar/getByCarId/:id", async (req: express.Request, 
 
 ManagerOwnerRouter.get("/staff", async (req: express.Request, res: express.Response) => {
 
-    let getRes = await StaffService.list(req.query.page)
+    let getRes = await StaffService.list(req.query)
     res.status(getRes.status)
     res.json(getRes.json);
 })
@@ -225,6 +225,12 @@ ManagerOwnerRouter.delete("/ticket", async(req: express.Request, res: express.Re
 })
 ManagerOwnerRouter.get("/ticket/:id", async (req: express.Request, res: express.Response)=>{
     let getRes = await TicketService.getById({_id : req.params.id})
+    res.status(getRes.status);
+    res.json(getRes.json);
+})
+// lấy dữ liệu ghé theo lộ trình
+ManagerOwnerRouter.get("/trip/getChair/:idTrip", async (req: express.Request, res: express.Response)=>{
+    let getRes = await TripCarService.getChairByTrip({_id : req.params.idTrip})
     res.status(getRes.status);
     res.json(getRes.json);
 })

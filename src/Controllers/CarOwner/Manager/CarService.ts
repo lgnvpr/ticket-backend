@@ -9,6 +9,9 @@ const collection = "Car"
 export class CarService {
     public static async list(params: any): Promise<any> {
         var getData: Paging<Car> = await MongoService._list(collection, params);
+        console.log("======================");
+        console.log(getData);
+        console.log("=======================")
         let typeCarIds = getData.rows.map((car : Car)=>{
             return car.typeCarId
         })

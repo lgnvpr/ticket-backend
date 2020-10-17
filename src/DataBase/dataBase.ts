@@ -1,0 +1,48 @@
+import { Staff } from "../base-ticket/base-carOwner/Staff";
+import { Status } from "../base-ticket/BaseModel";
+export const staff : Staff[]= [
+    {
+        _id : "b9db90b2-0fda-11eb-adc1-0242ac120002 ",
+        address : "Buôn Mê Thuột",
+        birthAt : new Date(),
+        status : Status.actived,
+        identityCard  :"123456789",
+        name : "Nguyễn Văn Lương",
+        phoneNumer : "0393457144",
+        positionId : "",
+        sex : "Nam",
+    },
+    {
+        _id : "b9db90b2-0fda-11eb-adc1-0242ac120002 ",
+        address : "Buôn Mê Thuột",
+        birthAt : new Date(),
+        status : Status.actived,
+        identityCard  :"123456789",
+        name : "Nguyễn Thành Quyết",
+        phoneNumer : "0393457144",
+        positionId : "",
+        sex : "Nam",
+    },
+    {
+        _id : "b9db90b2-0fda-11eb-adc1-0242ac120002 ",
+        address : "Buôn Mê Thuột",
+        birthAt : new Date(),
+        status : Status.actived,
+        identityCard  :"123456789",
+        name : "Nguyễn Ngọc Nam",
+        phoneNumer : "0393457144",
+        positionId : "",
+        sex : "Nam",
+    },
+    {
+        _id : "b9db90b2-0fda-11eb-adc1-0242ac120002 ",
+        address : "Buôn Mê Thuột",
+        birthAt : new Date(),
+        status : Status.actived,
+        identityCard  :"123456789",
+        name : "Huỳnh Văn Nam",
+        phoneNumer : "0393457144",
+        positionId : "",
+        sex : "Nam",
+    },
+]

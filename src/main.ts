@@ -7,7 +7,7 @@ server.listen(PORT);
 server.on('listening',async ()=>{
     console.log(`Listening on porrt ${PORT}`);
     try{
-        await MongoHelper.connect("mongodb://localhost:27017");
+        await MongoHelper.connect(process.env.MONGO_URI);
         console.info('Connected to Mongo.')
     }catch(err){
         console.log(err);

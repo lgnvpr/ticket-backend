@@ -69,9 +69,11 @@ export class ChairService {
     }
 
     public static async getByCarId(params: any): Promise<any> {
-        var carId: any = params.carId;
-        let getData = await MongoService._getByQuery(collection, { CarId: carId });
+        
+        var carId: any = params.carId.toString();
 
+        let getData = await MongoService._getByQuery(collection, { CarId: carId });
+        // return ResReturn.returnData(getData);
         // let listChair: Array<any> = getData.map((chair: ChairCar, value: number) => {
         //     let getRow: ChairCar = getData.find((chair3: ChairCar) => chair3.localRow == value)
         //     if (getRow) {

@@ -1,12 +1,15 @@
 import { get } from "mongoose";
 import ResReturn from "../../../applications/ResReturn";
 import { Car } from "../../../base-ticket/base-carOwner/Car";
+import { Customer } from "../../../base-ticket/base-carOwner/Customer";
 import { Route } from "../../../base-ticket/base-carOwner/Route";
 import { Staff } from "../../../base-ticket/base-carOwner/Staff";
+import { Ticket } from "../../../base-ticket/base-carOwner/Ticket";
 import { Trip } from "../../../base-ticket/base-carOwner/Trip";
 import { Paging } from "../../../base-ticket/Paging";
 import { MongoService } from "../../MongoService";
 import { CarService } from "./CarService";
+import { ChairService } from "./ChairService"
 
 const collection = "Trip"
 export class TripCarService {
@@ -17,8 +20,8 @@ export class TripCarService {
         });
 
         let createQuery = {
-            page : null, 
-            query : MongoService.createQueryForListId(carIds)
+            page: null,
+            query: MongoService.createQueryForListId(carIds)
         }
         let driveIds = getData.rows.map((trip: Trip) => {
             return trip.driveId
@@ -28,7 +31,7 @@ export class TripCarService {
             return trip.RouteId
         })
 
-        let car =await  ResReturn.getDataRes(await CarService.list(createQuery));
+        let car = await ResReturn.getDataRes(await CarService.list(createQuery));
         // return ResReturn.returnData(car);
         // return ResReturn.getDataRes(ResReturn.returnData(car));
         let drive = await MongoService._get("Staff", [...driveIds])
@@ -68,7 +71,7 @@ export class TripCarService {
     }
 
     public static async create(params: any): Promise<any> {
-
+        
         var getData: any = await MongoService._create(collection, params);
         return ResReturn.returnData(getData);
     }
@@ -83,6 +86,49 @@ export class TripCarService {
     public static async getById(params: any): Promise<any> {
         var getData: any = await MongoService._get(collection, params);
         return ResReturn.returnData(getData);
+    }
+
+    public static async getChairByTrip(params: any): Promise<any> {
+        let getTrip = await MongoService._get(collection, { _id: params._id });
+        getTrip = getTrip[0] || []
+        let getCarOfTrip = await MongoService._get("Car", { _id: getTrip.CarId })
+        getCarOfTrip = getCarOfTrip[0] || {}
+        let getListChair = await ChairService.getByCarId({ carId: getCarOfTrip._id });
+
+        let getTickByCarAndTrip: Paging<Ticket> = await MongoService._list("Ticket", {
+            query: {
+                CarId: getTrip.CarId,
+                tripId: getTrip._id.toString()
+            }
+        });
+        let ticks = getTickByCarAndTrip.rows;
+        let customerIds = ticks.map((tick : Ticket)=>{
+            return tick.customerId;
+        })
+
+        let getListCustomer = await MongoService._get("Customer",customerIds)
+        console.log("---------------------------")
+        console.log(customerIds);
+        let newDiagramChair = ResReturn.getDataRes(getListChair).map((floor: any) => {
+            return floor.map((row: any) => {
+                return row.map((column: any) => {
+                    let saveColumn = column;
+                    if (saveColumn._id) {
+                        let getTickOfChair: Ticket = ticks.find((tick: Ticket) => tick.ChairCarId == saveColumn._id);
+                        if (getTickOfChair) {
+                            getTickOfChair.customer = getListCustomer.find((customer  : Customer)=> customer._id == getTickOfChair.customerId)
+                            getTickOfChair.ChairCar = saveColumn;
+                            return getTickOfChair;
+                        } else {
+                            return { tripId: getTrip._id, CarId: getTrip.CarId, ChairCarId: saveColumn._id,ChairCar :saveColumn  }
+                        }
+                    } else {
+                        return {}
+                    }
+                })
+            })
+        })
+        return ResReturn.returnData(newDiagramChair);
     }
 
 

@@ -1,6 +1,7 @@
 import { get } from "mongoose";
 import ResReturn from "../../../applications/ResReturn";
 import { Car } from "../../../base-ticket/base-carOwner/Car";
+import { Ticket } from "../../../base-ticket/base-carOwner/Ticket";
 import { Paging } from "../../../base-ticket/Paging";
 import { MongoService } from "../../MongoService";
 
@@ -13,8 +14,17 @@ export class TicketService {
 
     public static async create(params : any ): Promise<any>{
 
-        var getData: any = await MongoService._create(collection, params);
-        return ResReturn.returnData(getData);
+
+        let ticket : Ticket = params;
+            let getCustomer = ticket.customer;
+            console.log("customer=======================================");
+            if(getCustomer) getCustomer =  await MongoService._create("Customer", getCustomer);
+            console.log(getCustomer);
+            ticket.customerId = getCustomer._id.toString();
+            delete ticket.customer;
+            var getData: any = MongoService._create(collection, ticket);
+            return ResReturn.returnData(getData);
+
     }
 
     public static async delete(params : any ) : Promise<any> {

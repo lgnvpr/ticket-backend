@@ -2,6 +2,7 @@ import { isForOfStatement } from '../../node_modules/typescript/lib/typescript';
 import { MongoHelper } from '../mongo.helper'
 import { Paging } from "../base-ticket/Paging"
 import { parse } from '../../node_modules/ts-node/dist/index';
+import { ISearch } from '../base-ticket/Query';
 var mongo = require('mongodb');
 export class MongoService {
 
@@ -38,59 +39,51 @@ export class MongoService {
     }
 
     public static async _list(collection: string, params: any): Promise<any> {
+        let query = {};
+        let search = {};
         console.log("\x1b[31m", `============list for ${collection}====================`);
-        let page :number= parseInt(params.page)||0
-        let getListData: [] = [];
+        let page: number = parseInt(params.page) || 0
 
         if (params.query) {
             console.log("on Query with Query and page")
             let syntaxQuery = params.query;
-            if (typeof syntaxQuery == "string") {
+            if (typeof syntaxQuery == "string") 
                 syntaxQuery = JSON.parse(params.query);
-            }
-
-            if (page) {
-                getListData = await this.collection(collection).find({
-                    $and: [syntaxQuery, { status: "active" }
-                    ]
-                }).limit(10).skip((page - 1) * 10).toArray();
-            } else {
-                getListData = await this.collection(collection).find({
-                    $and: [syntaxQuery, { status: "active" }
-                    ]
-                }).toArray();
+            query = {
+                $and: [syntaxQuery]
             }
         }
-        else if (page) {
-            console.log(params)
-            getListData = await this.collection(collection).find({ status: "active" }).limit(10).skip((page - 1) * 10).toArray();
+        if(params.search){
+            let syntaxSearch = params.search;
+            if (typeof syntaxSearch == "string") 
+            syntaxSearch = JSON.parse(params.search);
+            search = this.convertSeachsToQuery(params.search);
         }
-
-        else {
-            console.log("on Query  page")
-            getListData = await this.collection(collection).find({ status: "active" }).toArray();
-        }
-
-
-        return this.setPaging(collection, page, getListData);
+        return this.queryByPaging(collection, page, {
+            $and: [query,search, { status: "active" }
+            ]
+        });
     }
 
-
-    public static async setPaging(collection, page, T: Array<any>): Promise<Paging<any>> {
-        let getCount = await this.getPaging(collection);
+    public static async queryByPaging(collection, page, params: any): Promise<Paging<any>> {
+        let getListData :[]=[];
+        (page) 
+         ? getListData = await this.collection(collection).find(params).limit(10).skip((page - 1) * 10).toArray() ||[]
+        : getListData = await this.collection(collection).find(params).toArray() ||[];
+        let getCount = await this.getPaging(collection, params);
         let pagingCollection: Paging<any> = {
             page: page,
-            pageSize: T.length,
-            rows: T,
+            pageSize: getListData.length,
+            rows: getListData,
             total: getCount,
             totalPages: Math.ceil(getCount / 10)
         }
         return pagingCollection;
     }
 
-    public static async getPaging(collection: string): Promise<any> {
+    public static async getPaging(collection: string, params: any): Promise<any> {
         let count = await this.collection(collection).aggregate([
-            { $match: { status: "active" } },
+            { $match: params },
             { $group: { _id: "count", count: { $sum: 1 } } }
         ]).toArray();
         if (count.length > 0) {
@@ -111,6 +104,8 @@ export class MongoService {
         console.log("\x1b[31m", `============Create for ${collection}====================`);
         if (Array.isArray(params)) {
             params.map((params) => {
+                console.log(`=======${params._id}===========`)
+
                 params.status = "active",
                     params.createAt = new Date();
                 params.updateAt = new Date();
@@ -134,13 +129,13 @@ export class MongoService {
                 },
                     {
                         $set: customParams
-                    }).then(res => res)
+                    }).then(res => customParams)
                     .catch(err => err)
             }
         }
         customParams.createAt = new Date();
         return this.collection(collection).insert(customParams)
-            .then(res => res.ops)
+            .then(res => res.ops[0])
             .catch(err => err);
     }
 
@@ -182,5 +177,21 @@ export class MongoService {
         }
     }
 
-
+    private static convertSeachsToQuery(searchs: ISearch[]) {
+        let childQueries: Array<any> = new Array();
+        if (!searchs || (searchs &&searchs[0].content == "") ) return { $and: [{}] };
+        searchs?.map((item) => {
+          if (item && typeof item == "string") {
+            item = JSON.parse(item);
+          }
+          item.fields?.map((field) => {
+            let json = `{\"${field}\":{\"$regex\":\"${item.content}\",\"$options\":\"i\"}}`
+            childQueries.push(JSON.parse(json))
+          });
+        });
+        return {
+          $or: childQueries
+        };
+      }
 }
+
