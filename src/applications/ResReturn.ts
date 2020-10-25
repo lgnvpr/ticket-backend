@@ -7,7 +7,7 @@ export default class ResReturn{
             status : 500,
             json : { 
                 status : 500,
-                error : nameError
+                message : nameError
             }  
         };
         return res;

@@ -50,17 +50,4 @@ export class RouteCarService {
         var getData: any = await MongoService._get(collection, params);
         return ResReturn.returnData(getData);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

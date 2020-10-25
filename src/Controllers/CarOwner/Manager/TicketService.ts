@@ -24,7 +24,6 @@ export class TicketService {
             delete ticket.customer;
             var getData: any = MongoService._create(collection, ticket);
             return ResReturn.returnData(getData);
-
     }
 
     public static async delete(params : any ) : Promise<any> {

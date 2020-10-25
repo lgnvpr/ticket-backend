@@ -11,7 +11,6 @@ export class MongoService {
     }
 
     public static async _get(collection: string, params: any): Promise<any> {
-        //    return  await this.getField(collection,"viTriDatSach","D5");
         console.log("\x1b[31m", `============Create for ${collection}====================`);
 
         if (params && params._id) {
@@ -104,15 +103,14 @@ export class MongoService {
         console.log("\x1b[31m", `============Create for ${collection}====================`);
         if (Array.isArray(params)) {
             params.map((params) => {
-                console.log(`=======${params._id}===========`)
-
+                console.log(`--------------------${params._id}--------------------`)
                 params.status = "active",
                     params.createAt = new Date();
                 params.updateAt = new Date();
                 return params;
             })
             return this.collection(collection).insertMany(params)
-                .then(res => res)
+                .then(res => { console.log(res);return res})
                 .catch(err => err);
         }
         let customParams: any = { ...params, status: "active", updateAt: new Date() }
