@@ -51,7 +51,12 @@ export class ChairService {
                     
                     let newChair = {
                         CarId: carId,
-                        codeChair: "chair",
+                        codeChair: () => {
+                            let getNameFloor = fl == 1 ? "L" :"D"
+                            let getNameCollum = column==1 ? "A" : column ==2 ? "B" : column ==3 ? "C" : column ==4 ? "D" : "E"
+                            return `${getColumn} ${rw}${getColumn}`
+                        },
+
                         localColumn: getColumn,
                         localRow: rw,
                         localFloor: fl,

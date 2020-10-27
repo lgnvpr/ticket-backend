@@ -1,5 +1,6 @@
 import { get } from "mongoose";
 import ResReturn from "../../../applications/ResReturn";
+import { Account } from "../../../base-ticket/base-carOwner/Account";
 import { Car } from "../../../base-ticket/base-carOwner/Car";
 import { PostionStaff } from "../../../base-ticket/base-carOwner/PostionStaff";
 import { Staff } from "../../../base-ticket/base-carOwner/Staff";
@@ -11,11 +12,17 @@ export class StaffService {
     public static async list(params: any): Promise<any> {
         var getData: Paging<Staff> = await MongoService._list(collection, params);
         var postionStaffIds : Array<string> =  getData.rows.map((staff : Staff)=> staff.positionId); 
-        
+        var staffIds : Array<string> = getData.rows.map((staff : Staff)=> staff._id)
         var getPostionStaff: any = await MongoService._get("PostionStaff", postionStaffIds);
-        console.log(getPostionStaff);
+        var getAccount: Paging<Account> = await MongoService._list("account", params.query = {
+            staffId: { $in: staffIds } }
+        )
+
+        console.log(getAccount)
+
         getData.rows.map((staff : Staff)=> {
-            staff.position = getPostionStaff.find((position : PostionStaff) => position._id == staff.positionId)
+            staff.position = getPostionStaff.find((position: PostionStaff) => position._id == staff.positionId)
+            staff.account = getAccount.rows.find((account: Account) => account.staffId == staff._id)
             return staff;
         })
 

@@ -10,6 +10,7 @@ import { TicketService } from '../../Controllers/CarOwner/Manager/TicketService'
 import { RouteCarService } from '../../Controllers/CarOwner/Manager/RouteCarService';
 import { TypeCarService } from '../../Controllers/CarOwner/Manager/TypeCarService';
 import { TripCarService } from '../../Controllers/CarOwner/Manager/TripCarService';
+import { AccountService } from '../../Controllers/CarOwner/Manager/AccountService';
 
 const ManagerOwnerRouter = express.Router();
 
@@ -263,6 +264,38 @@ ManagerOwnerRouter.get("/trip/:id", async (req: express.Request, res: express.Re
 
 ManagerOwnerRouter.get("/trip/car/:id", async (req: express.Request, res: express.Response)=>{
     let getRes = await ChairService.getByCarId({carId : req.params.id})
+    res.status(getRes.status);
+    res.json(getRes.json);
+})
+
+
+ManagerOwnerRouter.get("/trip/car/:id", async (req: express.Request, res: express.Response)=>{
+    let getRes = await ChairService.getByCarId({carId : req.params.id})
+    res.status(getRes.status);
+    res.json(getRes.json);
+})
+
+
+// acccount
+ManagerOwnerRouter.get("/account", async (req: express.Request, res: express.Response) => {
+    let getRes = await AccountService.list(req.query)
+    res.status(getRes.status)
+    res.json(getRes.json);
+})
+
+ManagerOwnerRouter.post("/account", async(req: express.Request, res: express.Response) => {
+    let getRes = await AccountService.create(req.body)
+    res.status(getRes.status);
+    res.json(getRes.json);
+})
+
+ManagerOwnerRouter.delete("/account", async(req: express.Request, res: express.Response)=>{
+    let getRes = await AccountService.delete(req.body)
+    res.status(getRes.status);
+    res.json(getRes.json);
+})
+ManagerOwnerRouter.get("/account/:id", async (req: express.Request, res: express.Response)=>{
+    let getRes = await AccountService.getById({_id : req.params.id})
     res.status(getRes.status);
     res.json(getRes.json);
 })

@@ -67,7 +67,7 @@ export class MongoService {
     public static async queryByPaging(collection, page, params: any): Promise<Paging<any>> {
         let getListData :[]=[];
         (page) 
-         ? getListData = await this.collection(collection).find(params).limit(10).skip((page - 1) * 10).toArray() ||[]
+         ? getListData = await this.collection(collection).find(params).limit(6).skip((page - 1) * 6).toArray() ||[]
         : getListData = await this.collection(collection).find(params).toArray() ||[];
         let getCount = await this.getPaging(collection, params);
         let pagingCollection: Paging<any> = {
@@ -75,7 +75,7 @@ export class MongoService {
             pageSize: getListData.length,
             rows: getListData,
             total: getCount,
-            totalPages: Math.ceil(getCount / 10)
+            totalPages: Math.ceil(getCount / 6)
         }
         return pagingCollection;
     }
@@ -93,7 +93,9 @@ export class MongoService {
 
 
     public static async _getByQuery(collection: string, query: any): Promise<any> {
-        return await this.collection(collection).find(query).toArray();
+        return await this.collection(collection).aggregate([
+            { $match: query }
+        ]).toArray();
     }
 
 

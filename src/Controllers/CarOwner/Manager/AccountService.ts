@@ -1,9 +1,9 @@
 import { get } from "mongoose";
 import ResReturn from "../../../applications/ResReturn";
-import { Car } from "../../../base-ticket/base-carOwner/Car";
-import { Paging } from "../../../base-ticket/Paging";
+import { Account } from "../../../base-ticket/base-carOwner/Account";
 import { MongoService } from "../../MongoService";
-
+var md5 = require('md5');
+var jwt = require('jsonwebtoken');
 const collection = "account"
 export class AccountService {
     public static async list(params: any): Promise<any> {
@@ -12,7 +12,7 @@ export class AccountService {
     }
 
     public static async create(params: any): Promise<any> {
-
+        params.password = md5(params.password);
         var getData: any = await MongoService._create(collection, params);
         return ResReturn.returnData(getData);
     }
@@ -31,11 +31,24 @@ export class AccountService {
 
     public static async login(params: any): Promise<any> {
         var user: any = params.username;
-        var password: any = params.password;
-        // return ResReturn.returnData(params);
-        if (user == "admin" && password == "admin") {
+        var password: any = md5(params.password || "");
+
+        var query = {
+            $and: [{username : user},{password : password}, { status: "active" }
+            ]
+        }
+        let check : Account[]=await MongoService._getByQuery("account", query);
+
+        if (user == "admin" && password == md5(params.password || "")) {
             return ResReturn.returnData(user);
         }
+
+        if (check.length > 0) {
+            let getInfoAccount = await MongoService._getByQuery("Staff", { _id: check[0]?.staffId })
+            let token = await jwt.sign({ ...getInfoAccount}, 'luongQuyet');
+            return ResReturn.returnData(token);
+        }
+
         return ResReturn.returnError("Password or User incorrect");
 
     }
