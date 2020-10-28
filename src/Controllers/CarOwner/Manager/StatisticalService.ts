@@ -1,4 +1,5 @@
 import { get } from "mongoose";
+import { Meta } from "../../../app";
 import ResReturn from "../../../applications/ResReturn";
 import { Car } from "../../../base-ticket/base-carOwner/Car";
 import { Paging } from "../../../base-ticket/Paging";
@@ -6,7 +7,8 @@ import { CharDay, Statistical } from "../../../base-ticket/Statistical/Statistic
 import { MongoService } from "../../MongoService";
 
 export class StatisticalService {
-    public static async Statistical(params: any): Promise<any> {
+    public static async Statistical(ctx: Meta<any>): Promise<any> {
+        let params: any = ctx.params;
         if (typeof params?.query == "string") {
             params.query = JSON.parse(params.query);
         }

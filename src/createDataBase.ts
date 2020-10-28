@@ -19,6 +19,7 @@ create();
 async function create() {
 
     try {
+        
         await MongoHelper.connect(process.env.MONGO_URI);
         console.info('Connected to Mongo.');
 

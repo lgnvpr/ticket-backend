@@ -1,4 +1,5 @@
 import { get } from "mongoose";
+import { Meta } from "../../../app";
 import ResReturn from "../../../applications/ResReturn";
 import { Car } from "../../../base-ticket/base-carOwner/Car";
 import { ChairCar } from "../../../base-ticket/base-carOwner/ChairCar";
@@ -7,37 +8,45 @@ import { MongoService } from "../../MongoService";
 
 const collection = "ChairCar";
 export class ChairService {
-    public static async list(params: any): Promise<any> {
-        var getData: any = await MongoService._list(collection, params);
+    public static async list(ctx: Meta<any>): Promise<any> {
+        var getData: any = await MongoService._list(collection, ctx);
         return ResReturn.returnData(getData);
     }
 
-    public static async create(params: any): Promise<any> {
-
-        var getData: any = await MongoService._create(collection, params);
+    public static async create(ctx: Meta<ChairCar>): Promise<any> {
+        let chairCar: ChairCar = ctx.params;
+        if (!chairCar || chairCar.codeChair) {
+            return ResReturn.returnError("Không được để trống tên ghế")
+        }
+        var getData: any = await MongoService._create(collection, ctx);
         return ResReturn.returnData(getData);
     }
 
-    public static async delete(params: any): Promise<any> {
+    public static async delete(ctx: Meta<any>): Promise<any> {
+        let params: any = ctx.params;
         let getData: any;
         if (params && params._id)
-            getData = await MongoService.setInActive(collection, params._id);
+            getData = await MongoService.setInActive(collection, ctx);
         return ResReturn.returnData(getData);
     }
 
-    public static async getById(params: any): Promise<any> {
-        var getData: any = await MongoService._get(collection, params);
+    public static async getById(ctx: Meta<any>): Promise<any> {
+        let params: any = ctx.params;
+        var getData: any = await MongoService._get(collection, {...ctx, params : {_id : ctx.params.id}});
         return ResReturn.returnData(getData);
     }
 
-    public static async autoCreate(params: any): Promise<any> {
-
-        // var getData: any = await MongoService._create(collection, params);
+    public static async autoCreate(ctx: Meta<any>): Promise<any> {
+        let params: any = ctx.params;
         console.log(`create successfully chair ${params._id}`)
         let carId = params.carId;
         let floor = params.floor;
         let row = params.row;
         let column = params.collumn;
+        if (!floor || !row || !column) {
+            return ResReturn.returnError("Vui lòng nhập đúng thông tin")
+        }
+
         let listChair: Array<any> = new Array();
         for (let fl = 1; fl <= floor; fl++) {
             for (let rw = 1; rw <= row; rw++) {
@@ -62,7 +71,7 @@ export class ChairService {
             }
 
         }
-        var getData: any = await MongoService._create(collection, listChair);
+        var getData: any = await MongoService._create(collection, {...ctx, params : listChair});
         return ResReturn.returnData(getData);
 
         // return ResReturn.returnData(listChair);
@@ -75,9 +84,11 @@ export class ChairService {
         
     }
 
-    public static async getByCarId(params: any): Promise<any> {
-        
-        var carId: any = params.carId.toString();
+    public static async getByCarId(ctx: Meta<any>): Promise<any> {
+        let params: any = ctx.params;
+        console.log("ctx of by car id")
+        console.log(ctx);
+        var carId: any = params.id.toString();
 
         let getData = await MongoService._getByQuery(collection, { CarId: carId });
         // return ResReturn.returnData(getData);

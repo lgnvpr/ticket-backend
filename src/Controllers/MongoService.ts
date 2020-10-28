@@ -3,8 +3,11 @@ import { MongoHelper } from '../mongo.helper'
 import { Paging } from "../base-ticket/Paging"
 import { parse } from '../../node_modules/ts-node/dist/index';
 import { ISearch } from '../base-ticket/Query';
+import { Context, Meta } from '../app';
+import { firebase } from '../../FireBaseConfig';
 var mongo = require('mongodb');
 const { v4: uuidv4 } = require('uuid');
+const fireStoreFirebase = firebase.firestore();
 
 export class MongoService {
 
@@ -12,7 +15,8 @@ export class MongoService {
         return MongoHelper.client.db("ticker").collection(collection);
     }
 
-    public static async _get(collection: string, params: any): Promise<any> {
+    public static async _get(collection: string, ctx: Meta<any>): Promise<any> {
+        let params: any = ctx.params;
         console.log("\x1b[31m", `============Create for ${collection}====================`);
 
         if (params && params._id) {
@@ -39,38 +43,48 @@ export class MongoService {
         return await this.collection(collection).find({ status: "active" }).toArray();
     }
 
-    public static async _list(collection: string, params: any): Promise<any> {
+    public static async _list(collection: string, ctx: Meta<any>): Promise<any> {
+        let params: any = ctx.params;
+        console.log(params);
         let query = {};
         let search = {};
         console.log("\x1b[31m", `============list for ${collection}====================`);
         let page: number = parseInt(params.page) || 0
 
         if (params.query) {
-            console.log("on Query with Query and page")
-            let syntaxQuery = params.query;
-            if (typeof syntaxQuery == "string") 
+
+
+            let syntaxQuery = {};
+            syntaxQuery = params.query;
+            if (typeof syntaxQuery == "string")
                 syntaxQuery = JSON.parse(params.query);
+
+
             query = {
                 $and: [syntaxQuery]
             }
+            console.log(query)
         }
-        if(params.search){
+        if (params.search) {
             let syntaxSearch = params.search;
-            if (typeof syntaxSearch == "string") 
-            syntaxSearch = JSON.parse(params.search);
+            if (typeof syntaxSearch == "string")
+                syntaxSearch = JSON.parse(params.search);
             search = this.convertSeachsToQuery(params.search);
+            console.log("orror at sytax")
         }
         return this.queryByPaging(collection, page, {
-            $and: [query,search, { status: "active" }
+            $and: [query, search, { status: "active" }
             ]
         });
     }
 
     public static async queryByPaging(collection, page, params: any): Promise<Paging<any>> {
-        let getListData :[]=[];
-        (page) 
-         ? getListData = await this.collection(collection).find(params).limit(6).skip((page - 1) * 6).toArray() ||[]
-        : getListData = await this.collection(collection).find(params).toArray() ||[];
+        console.log("start query")
+        let getListData: [] = [];
+        (page)
+            ? getListData = await this.collection(collection).find(params).limit(6).skip((page - 1) * 6).toArray() || []
+            : getListData = await this.collection(collection).find(params).toArray() || [];
+        console.log("get successfully query")
         let getCount = await this.getPaging(collection, params);
         let pagingCollection: Paging<any> = {
             page: page,
@@ -106,27 +120,34 @@ export class MongoService {
     }
 
 
-    public static async _create(collection, params): Promise<any> {
+    public static async _create(collection, ctx: Meta<any>): Promise<any> {
+
+
+        let params: any = ctx.params;
         console.log("\x1b[31m", `============Create for ${collection}====================`);
         if (Array.isArray(params)) {
             params.map((params) => {
                 console.log(`--------------------${params._id}--------------------`)
                 params.status = "active",
-                    params.createAt = new Date();
-                    params._id=  uuidv4()
+                params.createAt = new Date();
+                params._id = uuidv4()
                 params.updateAt = new Date();
+                params.updateBy = ctx.user._id;
+                params.createBy = ctx.user._id;
                 return params;
             })
+            this.addNotificationsFirebase(ctx, collection, "create")
             return this.collection(collection).insertMany(params)
-                .then(res => { console.log(res);return res})
+                .then(res => { console.log(res); return res })
                 .catch(err => err);
         }
         let customParams: any = { ...params, status: "active", updateAt: new Date() }
-        delete customParams._id ;
+        delete customParams._id;
         if (params._id) {
             let _id = this.convertIdToIdObject(params._id);
-            let checkCreate = await this._get(collection, { _id: params._id });
+            let checkCreate = await this._get(collection, { params: { _id: params._id }, user: ctx.user } as Meta<any>);
             if (checkCreate.length > 0) {
+                this.addNotificationsFirebase(ctx, collection, "update")
                 return this.collection(collection).updateMany({
                     $or: [
                         { _id: _id },
@@ -139,14 +160,18 @@ export class MongoService {
                     .catch(err => err)
             }
         }
+
         customParams.createAt = new Date();
+        customParams.createBy = ctx.user._id;
         customParams._id = uuidv4();
+        this.addNotificationsFirebase(ctx, collection, "create")
         return this.collection(collection).insert(customParams)
             .then(res => res.ops[0])
             .catch(err => err);
     }
 
     public static _delete(collection, id: string): Promise<any> {
+
         return this.collection(collection).deleteOne({ _id: id }, true)
             .then((res) => {
                 return res;
@@ -154,7 +179,9 @@ export class MongoService {
             .catch(err => err)
     }
 
-    public static setInActive(collection, id: string): Promise<any> {
+    public static setInActive(collection, ctx: Meta<any>): Promise<any> {
+        this.addNotificationsFirebase(ctx, collection, "delete")
+        let id =ctx?.params?._id 
         let _id = this.convertIdToIdObject(id);
         return this.collection(collection).updateMany({
             $or: [
@@ -186,19 +213,82 @@ export class MongoService {
 
     private static convertSeachsToQuery(searchs: ISearch[]) {
         let childQueries: Array<any> = new Array();
-        if (!searchs || (searchs &&searchs[0].content == "") ) return { $and: [{}] };
+        if (!searchs || (searchs && searchs[0].content == "")) return { $and: [{}] };
         searchs?.map((item) => {
-          if (item && typeof item == "string") {
-            item = JSON.parse(item);
-          }
-          item.fields?.map((field) => {
-            let json = `{\"${field}\":{\"$regex\":\"${item.content}\",\"$options\":\"i\"}}`
-            childQueries.push(JSON.parse(json))
-          });
+            if (item && typeof item == "string") {
+                item = JSON.parse(item);
+            }
+            item.fields?.map((field) => {
+                let json = `{\"${field}\":{\"$regex\":\"${item.content}\",\"$options\":\"i\"}}`
+                childQueries.push(JSON.parse(json))
+            });
         });
         return {
-          $or: childQueries
+            $or: childQueries
         };
-      }
+    }
+
+    private static async addNotificationsFirebase(ctx: Meta<any>, collection, action) {
+
+        switch (action) {
+            case "update":
+                action = "cập nhật"
+                break;
+
+            case "delete":
+                action = "xóa"
+                break;
+
+            case "create":
+                action = "thêm"
+                break;
+            default:
+                action = "thao tác trên"
+                break;
+        }
+
+        switch (collection) {
+            case "account":
+                collection = "tài khoản nhân viên"
+                break;
+            case "Car":
+                collection = "xe"
+                break;
+            case "ChairCar":
+                collection = "loại xe"
+                break;
+            case "Customer":
+                collection = "khách hàng"
+                break;
+            case "PostionStaff":
+                collection = "Chức vụ"
+                break;
+            case "Route":
+                collection = "lộ trình"
+                break;
+            case "Staff":
+                collection = "nhân viên"
+                break;
+            case "Ticket":
+                collection = "vé xe"
+                break;
+            case "Trip":
+                collection = "chuyến đi"
+                break;
+            case "TypeCar" : collection = "loại xe"
+            default:
+                break;
+        }
+
+
+        const docRef = await fireStoreFirebase
+            .collection("notification")
+            .doc("notification");
+        await docRef.set({
+            title: `Thao tác ${action} mới`,
+            time: new Date(),
+            content:`${ctx.user.name} vừa ${action} ${collection}`
+        });
+    }
 }
 
