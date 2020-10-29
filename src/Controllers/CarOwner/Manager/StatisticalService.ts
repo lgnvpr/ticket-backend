@@ -2,7 +2,7 @@ import { get } from "mongoose";
 import ResReturn from "../../../applications/ResReturn";
 import { Car } from "../../../base-ticket/base-carOwner/Car";
 import { Paging } from "../../../base-ticket/Paging";
-import { CharDay, Statistical } from "../../../base-ticket/Statistical/StatisticalOrigin";
+import { CharDay, Statistical } from "../../../base-ticket/Statistical/Statistical";
 import { MongoService } from "../../MongoService";
 
 export class StatisticalService {
