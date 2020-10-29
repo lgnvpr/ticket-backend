@@ -39,7 +39,7 @@ export class RouteCarService {
     public static async create(ctx: Meta<Route>): Promise<any>{
         let route: Route = ctx.params;
         console.log(ctx)
-        if (!route || !route.localStart || route.localEnd || !route.startAt || !route.sumTimeRun) {
+        if (!route || !route.localStart || !route.localEnd || !route.startAt || !route.sumTimeRun) {
             return ResReturn.returnError("Vui lòng nhập đầy đủ thông tin")
         }
         

@@ -30,9 +30,14 @@ async function create() {
                 _id: uuidv4(),
                 name: namePostion[i],
                 description: "This a postion",
+                createAt: new Date(),
+                useLogin: true
             })
         }
-        await MongoService._create("PostionStaff", listPostion);
+        await MongoService._create("PostionStaff", {
+            params: listPostion,
+            user : {}
+        });
         console.log(listPostion);
 
         let listName: string[] = data.name;
@@ -52,7 +57,10 @@ async function create() {
                 positionId: listPostion[Math.floor(Math.random() * listPostion.length - 2)]?._id
             })
         }
-        await MongoService._create("Staff", listStaff);
+        await MongoService._create("Staff", {
+            params: listStaff,
+            user : {}
+        });
         
         let getTypeCarName: string[] = data.nameTypeCar;
         let listTypeCar: TypeCar[] = [];
@@ -62,7 +70,10 @@ async function create() {
                 nameTypeCar: getTypeCarName[i]
             })
         }
-        await MongoService._create("TypeCar", listTypeCar);
+        await MongoService._create("TypeCar", {
+            params: listTypeCar,
+            user : {}
+        });
 
         
         let listCar: Car[] = [];
@@ -82,7 +93,10 @@ async function create() {
 
             })
         }
-        await MongoService._create("Car", listCar);
+        await MongoService._create("Car", {
+            params: listCar,
+            user : {}
+        });
         
         let listCustomer : Customer[] = []
         for (let i = 0; i < listName.length; i++) {
@@ -102,7 +116,10 @@ async function create() {
             
         }
 
-        await MongoService._create("Customer", listCustomer);
+        await MongoService._create("Customer", {
+            params: listCustomer,
+            user : {}
+        });
 
         //tạo chuyến đi 
         let listRouter: Route[] = []
@@ -119,7 +136,10 @@ async function create() {
             return router.localEnd != router.localStart
         })
 
-        await MongoService._create("Route", listRouter);
+        await MongoService._create("Route", {
+            params: listRouter,
+            user : {}
+        });
 
         const accoutn = {
                 staffId : listStaff[0]._id,
@@ -127,7 +147,7 @@ async function create() {
                 password : "123123",
         }
 
-        await AccountService.create(accoutn);
+        await AccountService.create({ params : accoutn, user : {}});
 
         let dataChar: [] = [];
 
@@ -139,7 +159,7 @@ async function create() {
                 carId : listCar[i]._id
             } 
 
-            ChairService.autoCreate(chair);
+            ChairService.autoCreate({params : chair , user : {}});
             
         }
 

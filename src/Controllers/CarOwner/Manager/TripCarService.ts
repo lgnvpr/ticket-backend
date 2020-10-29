@@ -41,9 +41,17 @@ export class TripCarService {
             endDate.setMilliseconds(0);
             endDate.setDate(endDate.getDate() + 1);
 
-            queryByDate = {
-                timeStart: { $gte: new Date(startDate), $lte: new Date(endDate) }
-            } as any
+            if (ctx.params.params.endDate) {
+                queryByDate = {
+                    timeStart: { $gte: new Date(startDate), $lte: new Date(endDate) }
+                } as any
+            }
+            else {
+                queryByDate = {
+                    timeStart: { $gte: new Date(startDate) }
+                } as any
+            }
+            
         } else {
             queryByDate = {}  as any
         }

@@ -6,6 +6,8 @@ import { ManagerOwnerRouter } from "./applications/CarOwner/ManagerOwner.router"
 import { LoginCarOwnerRouter } from "./applications/CarOwner/LoginCarOwner.router";
 import { Staff } from "./base-ticket/base-carOwner/Staff";
 import { MongoService } from "./Controllers/MongoService";
+import { PostionStaff } from "./base-ticket/base-carOwner/PostionStaff";
+import ResReturn from "./applications/ResReturn";
 var jwt = require('jsonwebtoken');
 
 const app = express();
@@ -14,16 +16,25 @@ app.use(bodyparser.json());
 
 
 // app.use(requestLoggerMiddleware);
-app.use("/manager",async function (req: Context, res, next) {
+app.use("/manager", async function (req: Context, res, next) {
+    console.log("on middleware")
     req.meta = {} as any;
-    let check = [];
+    let check : Staff[]= [] ;
     let verifyInfo: Staff = {} as Staff;
+    let checkQuyen: PostionStaff[] = [];
     try {
         var decoded = jwt.verify(req.headers["authorization"], 'luongQuyet');
         verifyInfo = decoded["0"];
-        check = await MongoService._get("Staff", {params : verifyInfo,user : {}}as Meta<Staff>);
+        check = await MongoService._get("Staff", { params: verifyInfo, user: {} } as Meta<Staff>);
+        checkQuyen = await MongoService._get("PostionStaff", { params: { _id: check[0].positionId }, user: {} });
+
+        if (!checkQuyen[0].useLogin) {
+            let dataReturn : any = ResReturn.returnError("Bạn không có quyền truy cập vào ứng dụng");
+            res.status(dataReturn.status),
+            res.json(dataReturn.json);    
+        }
     } catch (error) {
-        res.status(401)
+        res.status(401),
         res.json("error token authentication");
     }
     if (check.length > 0) {

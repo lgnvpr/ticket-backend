@@ -23,7 +23,8 @@ ManagerOwnerRouter.get("/car", async (req: Context, res: express.Response) => {
     res.json(getRes.json);
 })
 
-ManagerOwnerRouter.post("/car", async(req: Context, res: express.Response) => {
+ManagerOwnerRouter.post("/car", async (req: Context, res: express.Response) => {
+    console.log("on router carr");
     let getRes = await CarService.create(req.meta)
     res.status(getRes.status);
     res.json(getRes.json);

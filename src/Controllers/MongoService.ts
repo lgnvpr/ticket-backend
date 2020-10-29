@@ -5,6 +5,7 @@ import { parse } from '../../node_modules/ts-node/dist/index';
 import { ISearch } from '../base-ticket/Query';
 import { Context, Meta } from '../app';
 import { firebase } from '../../FireBaseConfig';
+import { Status } from '../base-ticket/BaseModel';
 var mongo = require('mongodb');
 const { v4: uuidv4 } = require('uuid');
 const fireStoreFirebase = firebase.firestore();
@@ -52,8 +53,6 @@ export class MongoService {
         let page: number = parseInt(params.page) || 0
 
         if (params.query) {
-
-
             let syntaxQuery = {};
             syntaxQuery = params.query;
             if (typeof syntaxQuery == "string")
@@ -79,16 +78,29 @@ export class MongoService {
     }
 
     public static async queryByPaging(collection, page, params: any): Promise<Paging<any>> {
+
+
+
         console.log("start query")
         let getListData: [] = [];
         (page)
-            ? getListData = await this.collection(collection).find(params).limit(6).skip((page - 1) * 6).toArray() || []
-            : getListData = await this.collection(collection).find(params).toArray() || [];
+            ? getListData = await this.collection(collection).aggregate([
+                { $match: params },
+                { $sort: {createAt : 1}},
+                { $skip: page - 1 },
+                { $limit: 6 }
+            ]).toArray() || []
+
+            : getListData = await this.collection(collection).aggregate([
+                { $match: params },
+                { $sort: {createAt : 1}}
+            ]).toArray() || [];
+
         let getCount = await this.getPaging(collection, params);
         let pagingCollection: Paging<any> = {
             page: page,
             pageSize: getListData.length,
-            rows: getListData,
+            rows: getListData.reverse(),
             total: getCount,
             totalPages: Math.ceil(getCount / 6)
         }
@@ -128,11 +140,11 @@ export class MongoService {
             params.map((params) => {
                 console.log(`--------------------${params._id}--------------------`)
                 params.status = "active",
-                params.createAt = new Date();
+                    params.createAt = new Date();
                 params._id = uuidv4()
                 params.updateAt = new Date();
-                params.updateBy = ctx.user._id;
-                params.createBy = ctx.user._id;
+                params.updateBy = ctx.user?._id;
+                params.createBy = ctx.user?._id;
                 return params;
             })
             this.addNotificationsFirebase(ctx, collection, "create")
@@ -140,13 +152,14 @@ export class MongoService {
                 .then(res => { console.log(res); return res })
                 .catch(err => err);
         }
-        let customParams: any = { ...params, status: "active", updateAt: new Date() }
+        let customParams: any = { ...params, status: "active", updateAt: new Date(), updateBy: ctx.user?._id }
         delete customParams._id;
         if (params?._id) {
             let _id = this.convertIdToIdObject(params._id);
             let checkCreate = await this._get(collection, { params: { _id: params._id }, user: ctx.user } as Meta<any>);
             if (checkCreate.length > 0) {
                 this.addNotificationsFirebase(ctx, collection, "update")
+                customParams.createAt = new Date(customParams.createAt || new Date())
                 return this.collection(collection).updateMany({
                     $or: [
                         { _id: _id },
@@ -155,7 +168,7 @@ export class MongoService {
                 },
                     {
                         $set: customParams
-                    }).then(res => {return {...customParams, _id : params._id}})
+                    }).then(res => { return { ...customParams, _id: params._id } })
                     .catch(err => err)
             }
         }
@@ -180,8 +193,9 @@ export class MongoService {
 
     public static setInActive(collection, ctx: Meta<any>): Promise<any> {
         this.addNotificationsFirebase(ctx, collection, "delete")
-        let id =ctx?.params?._id 
+        let id = ctx?.params?._id
         let _id = this.convertIdToIdObject(id);
+
         return this.collection(collection).updateMany({
             $or: [
                 { _id: id },
@@ -274,7 +288,7 @@ export class MongoService {
             case "Trip":
                 collection = "chuyến đi"
                 break;
-            case "TypeCar" : collection = "loại xe"
+            case "TypeCar": collection = "loại xe"
             default:
                 break;
         }
@@ -286,7 +300,7 @@ export class MongoService {
         await docRef.set({
             title: `Thao tác ${action} mới`,
             time: new Date(),
-            content:`${ctx.user.name} vừa ${action} ${collection}`
+            content: `${ctx.user.name} vừa ${action} ${collection}`
         });
     }
 }

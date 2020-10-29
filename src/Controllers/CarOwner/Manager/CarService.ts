@@ -23,6 +23,7 @@ export class CarService {
     }
     
     public static async create(ctx: Meta<Car>): Promise<any>{
+        console.log("on creat car")
         let car: Car = ctx.params;
         if (!car || (!car.name || !car.licensePlates || !car.entryAt )) {
             return ResReturn.returnError("Vui lòng nhập đầy đủ thông tin")
