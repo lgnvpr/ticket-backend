@@ -4,6 +4,8 @@ import { Paging } from "../base-ticket/Paging"
 import { parse } from '../../node_modules/ts-node/dist/index';
 import { ISearch } from '../base-ticket/Query';
 var mongo = require('mongodb');
+const { v4: uuidv4 } = require('uuid');
+
 export class MongoService {
 
     public static collection(collection: string): any {
@@ -111,6 +113,7 @@ export class MongoService {
                 console.log(`--------------------${params._id}--------------------`)
                 params.status = "active",
                     params.createAt = new Date();
+                    params._id=  uuidv4()
                 params.updateAt = new Date();
                 return params;
             })
@@ -119,7 +122,7 @@ export class MongoService {
                 .catch(err => err);
         }
         let customParams: any = { ...params, status: "active", updateAt: new Date() }
-        delete customParams._id;
+        customParams._id = uuidv4();
         if (params._id) {
             let _id = this.convertIdToIdObject(params._id);
             let checkCreate = await this._get(collection, { _id: params._id });

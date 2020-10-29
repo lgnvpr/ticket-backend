@@ -10,6 +10,9 @@ import { Car } from "./base-ticket/base-carOwner/Car";
 import { Status } from "./base-ticket/BaseModel";
 import { Customer } from "./base-ticket/base-carOwner/Customer";
 import { Route } from "./base-ticket/base-carOwner/Route";
+import { AccountService } from "./Controllers/CarOwner/Manager/AccountService";
+import { ChairCar } from "./base-ticket/base-carOwner/ChairCar";
+import { ChairService } from "./Controllers/CarOwner/Manager/ChairService";
 const { v4: uuidv4 } = require('uuid');
 
 create();
@@ -119,11 +122,25 @@ async function create() {
 
         const accoutn = {
                 staffId : listStaff[0]._id,
-                username : "quyet",
-                password : "4297f44b13955235245b2497399d7a93",
+                username : "luong",
+                password : "123123",
         }
 
-        await MongoService._create("accoutn", listRouter);
+        await AccountService.create(accoutn);
+
+        let dataChar: [] = [];
+
+        for (let i = 0; i < listCar.length; i++) {
+            const chair = {
+                floor: 2,
+                row: 10,
+                collumn: 4,
+                carId : listCar[i]._id
+            } 
+
+            ChairService.autoCreate(chair);
+            
+        }
 
 
     } catch (err) {

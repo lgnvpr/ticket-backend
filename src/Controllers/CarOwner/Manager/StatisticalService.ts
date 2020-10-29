@@ -7,6 +7,9 @@ import { MongoService } from "../../MongoService";
 
 export class StatisticalService {
     public static async Statistical(params: any): Promise<any> {
+        if (typeof params?.query == "string") {
+            params.query = JSON.parse(params.query);
+        }
         var totalCustomer: any = await MongoService._Query("Customer", [
             { $match: {} },
             { $group: { _id: "count", totalCustomer: { $sum: 1 } } }
@@ -23,7 +26,7 @@ export class StatisticalService {
                 }
             },
             { $unwind: "$Trip" },
-            { $group: { _id: "aaa", totalRevenue: { $sum: "$Trip.price" } } }
+            { $group: { _id: "trip", totalRevenue: { $sum: "$Trip.price" } } }
         ]);
 
         var totalTrip: any = await MongoService._Query("Trip", [
@@ -36,15 +39,26 @@ export class StatisticalService {
             { $group: { _id: "ticket", totalTicket: { $sum: 1 } } }
         ])
 
+        let typeGet : any = {
+            year: { $year: "$createAt" },
+            month: { $month: "$createAt" },
+            day: { $dayOfMonth: "$createAt" }
+        }
+
+
+        if (params?.query?.typeGet == "month") {
+            typeGet = {
+                year: { $year: "$createAt" },
+                month: { $month: "$createAt" }
+            }
+        }
+
+
         var charTicket: any = await MongoService._Query("Ticket", [
             { $match: {} },
             {
                 $group: {
-                    '_id': {
-                        year: { $year: "$createAt" },
-                        month: { $month: "$createAt" },
-                        day: { $dayOfMonth: "$createAt" }
-                    },
+                    '_id': typeGet,
                     data: { $sum: 1 }
                 }
             },
@@ -60,32 +74,33 @@ export class StatisticalService {
                     as: "Trip"
                 }
             },
-            { $unwind: "$Trip"},
+            { $unwind: "$Trip" },
             {
                 $group: {
-                    _id: {
-                        year: { $year: "$createAt" },
-                        month: { $month: "$createAt" },
-                        day: { $dayOfMonth: "$createAt" }
-                    }, data: { $sum: "$Trip.price" }
+                    _id: typeGet,
+                    data: { $sum: "$Trip.price" }
                 }
             }
         ])
 
+        console.log("--------------------------------");
+        console.log(params)
+        
+
         var statistic: Statistical = {
-            totalCustomer: totalCustomer[0]?.totalCustomer,
-            totalRevenue: totalRevenue[0]?.totalRevenue,
-            totalTicket: totalTicket[0]?.totalTicket,
-            totalTrip: totalTrip[0]?.totalTrip,
-            charTicket: this.exportDataChar(charTicket),
-            charRevenue : this.exportDataChar(charRevenue)
+            totalCustomer: totalCustomer[0]?.totalCustomer || 0,
+            totalRevenue: totalRevenue[0]?.totalRevenue||0,
+            totalTicket: totalTicket[0]?.totalTicket || 0,
+            totalTrip: totalTrip[0]?.totalTrip || 0,
+            charTicket: this.exportDataChar(charTicket, params?.query?.totalGet || 7) || [],
+            charRevenue: this.exportDataChar(charRevenue, params?.query?.totalGet || 7) || []
 
         }
 
         return ResReturn.returnData(statistic);
     }
 
-    private static exportDataChar(data: any): any {
+    private static exportDataChar(data: any, numberLoop: number = 7): any {
         let newData: CharDay[] = data.map((dataChar => {
             let date: Date = new Date(`${dataChar._id.year}/${dataChar._id.month}/${dataChar._id.day}`);
             date = this.resetDate(date);
@@ -94,7 +109,7 @@ export class StatisticalService {
             return dataChar;
         }))
         let returnData: CharDay[] = [];
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < numberLoop; i++) {
             let dateNeedRender: Date = this.resetDate(new Date);
             dateNeedRender.setDate(dateNeedRender.getDate() - i);
             let getData = newData.find(dataItem => dataItem.day.getTime() === dateNeedRender.getTime());

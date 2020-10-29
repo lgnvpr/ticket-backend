@@ -33,6 +33,7 @@ export class ChairService {
     public static async autoCreate(params: any): Promise<any> {
 
         // var getData: any = await MongoService._create(collection, params);
+        console.log(`create successfully chair ${params._id}`)
         let carId = params.carId;
         let floor = params.floor;
         let row = params.row;
@@ -48,14 +49,9 @@ export class ChairService {
                     (column ==4 && cl >=3)  ? getColumn = cl+1 : getColumn = cl;
                     if(column ==5 ) getColumn = column;
 
-                    
                     let newChair = {
                         CarId: carId,
-                        codeChair: () => {
-                            let getNameFloor = fl == 1 ? "L" :"D"
-                            let getNameCollum = column==1 ? "A" : column ==2 ? "B" : column ==3 ? "C" : column ==4 ? "D" : "E"
-                            return `${getColumn} ${rw}${getColumn}`
-                        },
+                        codeChair: this.codeChair(fl, column, rw),
 
                         localColumn: getColumn,
                         localRow: rw,
@@ -71,6 +67,12 @@ export class ChairService {
 
         // return ResReturn.returnData(listChair);
 
+    }
+    private static codeChair(fl: number, column: number, rw : number) {
+        let getNameFloor = fl == 1 ? "L" : "D"
+        let getNameCollum = column == 1 ? "A" : column == 2 ? "B" : column == 3 ? "C" : column == 4 ? "D" : "E"
+        return `${getNameFloor} ${rw}${getNameCollum}`
+        
     }
 
     public static async getByCarId(params: any): Promise<any> {

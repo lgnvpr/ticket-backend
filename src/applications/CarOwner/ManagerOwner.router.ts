@@ -303,7 +303,7 @@ ManagerOwnerRouter.get("/account/:id", async (req: express.Request, res: express
 
 //statistic
 ManagerOwnerRouter.get("/statistic", async (req: express.Request, res: express.Response)=>{
-    let getRes = await StatisticalService.Statistical(req.body);
+    let getRes = await StatisticalService.Statistical(req.query);
     res.status(getRes.status);
     res.json(getRes.json);
 })
