@@ -14,7 +14,7 @@ export class CustomerService {
     }
 
     public static async create(ctx: Meta<Customer>): Promise<any>{
-        if (ctx.params || !ctx.params?.name || !ctx.params.phoneNumber) {
+        if (!ctx.params || !ctx.params?.name || !ctx.params.phoneNumber) {
             return ResReturn.returnError("Không được để trống tên và số điện thoại");
         }
         var getData: any = await MongoService._create(collection, ctx);

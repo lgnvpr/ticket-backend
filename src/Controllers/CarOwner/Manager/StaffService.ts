@@ -36,7 +36,9 @@ export class StaffService {
 
     public static async create(ctx: Meta<Staff>): Promise<any> {
         let staff: Staff = ctx.params;
-
+        if (!staff || !staff.address || !staff.birthAt || !staff.identityCard || !staff.name || !staff.phoneNumer || !staff.sex) {
+            return ResReturn.returnError("Vui lòng nhập đầy đủ thông tin");
+        }
         var getData: any = await MongoService._create(collection, ctx);
         return ResReturn.returnData(getData);
     }

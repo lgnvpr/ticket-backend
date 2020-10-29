@@ -84,7 +84,6 @@ export class MongoService {
         (page)
             ? getListData = await this.collection(collection).find(params).limit(6).skip((page - 1) * 6).toArray() || []
             : getListData = await this.collection(collection).find(params).toArray() || [];
-        console.log("get successfully query")
         let getCount = await this.getPaging(collection, params);
         let pagingCollection: Paging<any> = {
             page: page,
@@ -143,7 +142,7 @@ export class MongoService {
         }
         let customParams: any = { ...params, status: "active", updateAt: new Date() }
         delete customParams._id;
-        if (params._id) {
+        if (params?._id) {
             let _id = this.convertIdToIdObject(params._id);
             let checkCreate = await this._get(collection, { params: { _id: params._id }, user: ctx.user } as Meta<any>);
             if (checkCreate.length > 0) {
@@ -156,7 +155,7 @@ export class MongoService {
                 },
                     {
                         $set: customParams
-                    }).then(res => customParams)
+                    }).then(res => {return {...customParams, _id : params._id}})
                     .catch(err => err)
             }
         }
@@ -166,7 +165,7 @@ export class MongoService {
         customParams._id = uuidv4();
         this.addNotificationsFirebase(ctx, collection, "create")
         return this.collection(collection).insert(customParams)
-            .then(res => res.ops[0])
+            .then(res => customParams)
             .catch(err => err);
     }
 

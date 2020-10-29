@@ -15,7 +15,7 @@ export class ChairService {
 
     public static async create(ctx: Meta<ChairCar>): Promise<any> {
         let chairCar: ChairCar = ctx.params;
-        if (!chairCar || chairCar.codeChair) {
+        if (!chairCar || !chairCar.codeChair) {
             return ResReturn.returnError("Không được để trống tên ghế")
         }
         var getData: any = await MongoService._create(collection, ctx);
@@ -86,7 +86,7 @@ export class ChairService {
 
     public static async getByCarId(ctx: Meta<any>): Promise<any> {
         let params: any = ctx.params;
-        console.log("ctx of by car id")
+        console.log("=======on ctx of get by car id ======")
         console.log(ctx);
         var carId: any = params.id.toString();
 

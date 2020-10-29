@@ -10,6 +10,8 @@ const collection = "Ticket"
 export class TicketService {
     public static async list(ctx: Meta<any>): Promise<any> {
         let params: any = ctx.params;
+        
+
         var getData: any = await MongoService._list(collection, params);
         return ResReturn.returnData(getData);
     }
@@ -18,14 +20,17 @@ export class TicketService {
         
         let params: any = ctx.params;
         let ticket: Ticket = params;
-        if (!ticket.customer.name || !ticket.customer.phoneNumer) {
+        if (!ticket ||!ticket.customer.name || !ticket.customer.phoneNumer) {
             return ResReturn.returnError("Không được để trống tên và số điên thoại khách hàng");
         }
         let getCustomer = ticket.customer;
         if (getCustomer) getCustomer = await MongoService._create("Customer", { ...ctx, params: getCustomer });
+        console.log("========ves xe sau khi crate===========")
+        console.log(ticket)
         ticket.customerId = getCustomer._id.toString();
         delete ticket.customer;
         var getData: any = MongoService._create(collection, { ...ctx, params: ticket });
+        
         return ResReturn.returnData(getData);
     }
 

@@ -234,7 +234,7 @@ ManagerOwnerRouter.get("/ticket/:id", async (req: Context, res: express.Response
 })
 // lấy dữ liệu ghé theo lộ trình
 ManagerOwnerRouter.get("/trip/getChair/:id", async (req: Context, res: express.Response)=>{
-    let getRes = await TripCarService.getChairByTrip(req.meta)
+    let getRes = await TripCarService.getChairByTrip(getIdOfParams(req))
     res.status(getRes.status);
     res.json(getRes.json);
 })

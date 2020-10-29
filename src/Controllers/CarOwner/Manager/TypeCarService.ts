@@ -16,7 +16,7 @@ export class TypeCarService {
     }
 
     public static async create(ctx: Meta<TypeCar>): Promise<any>{
-        if(!ctx.params.nameTypeCar){
+        if(!ctx.params||!ctx.params.nameTypeCar){
             return ResReturn.returnError("Không được để trống tên loại xe")
         }
         var getData: any = await MongoService._create(collection, ctx);

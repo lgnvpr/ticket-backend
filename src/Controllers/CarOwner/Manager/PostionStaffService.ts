@@ -14,7 +14,7 @@ export class PostionStaffService {
     }
 
     public static async create(ctx: Meta<PostionStaff>): Promise<any>{
-        if (!ctx.params.name) {
+        if ( !ctx.params ||!ctx.params.name) {
             return  ResReturn.returnError("Không được để trống tên chức vụ")
         }
         var getData: any = await MongoService._create(collection, ctx);
