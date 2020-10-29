@@ -122,7 +122,7 @@ export class MongoService {
                 .catch(err => err);
         }
         let customParams: any = { ...params, status: "active", updateAt: new Date() }
-        customParams._id = uuidv4();
+        delete customParams._id ;
         if (params._id) {
             let _id = this.convertIdToIdObject(params._id);
             let checkCreate = await this._get(collection, { _id: params._id });
@@ -140,6 +140,7 @@ export class MongoService {
             }
         }
         customParams.createAt = new Date();
+        customParams._id = uuidv4();
         return this.collection(collection).insert(customParams)
             .then(res => res.ops[0])
             .catch(err => err);
