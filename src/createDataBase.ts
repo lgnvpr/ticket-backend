@@ -117,6 +117,14 @@ async function create() {
 
         await MongoService._create("Route", listRouter);
 
+        const accoutn = {
+                staffId : listStaff[0]._id,
+                username : "quyet",
+                password : "4297f44b13955235245b2497399d7a93",
+        }
+
+        await MongoService._create("accoutn", listRouter);
+
 
     } catch (err) {
         console.log(err);

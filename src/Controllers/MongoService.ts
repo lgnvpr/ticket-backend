@@ -99,6 +99,9 @@ export class MongoService {
     }
 
 
+    public static async _Query(collection: string, query: any): Promise<any> {
+        return await this.collection(collection).aggregate(query).toArray();
+    }
 
 
     public static async _create(collection, params): Promise<any> {

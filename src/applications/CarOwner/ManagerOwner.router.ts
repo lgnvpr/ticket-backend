@@ -11,6 +11,7 @@ import { RouteCarService } from '../../Controllers/CarOwner/Manager/RouteCarServ
 import { TypeCarService } from '../../Controllers/CarOwner/Manager/TypeCarService';
 import { TripCarService } from '../../Controllers/CarOwner/Manager/TripCarService';
 import { AccountService } from '../../Controllers/CarOwner/Manager/AccountService';
+import { StatisticalService } from '../../Controllers/CarOwner/Manager/StatisticalService';
 
 const ManagerOwnerRouter = express.Router();
 
@@ -300,5 +301,11 @@ ManagerOwnerRouter.get("/account/:id", async (req: express.Request, res: express
     res.json(getRes.json);
 })
 
+//statistic
+ManagerOwnerRouter.get("/statistic", async (req: express.Request, res: express.Response)=>{
+    let getRes = await StatisticalService.Statistical(req.body);
+    res.status(getRes.status);
+    res.json(getRes.json);
+})
 
 export { ManagerOwnerRouter }
