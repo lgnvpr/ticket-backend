@@ -1,4 +1,4 @@
-import { app } from "./app";
+import { app, Meta } from "./app";
 import * as http from "http";
 import * as data from "./DataBase/dataBase"
 import { MongoHelper } from "./mongo.helper";
@@ -32,7 +32,13 @@ async function create() {
                 description: "This a postion",
             })
         }
-        await MongoService._create("PostionStaff", listPostion);
+        const ctxPosition : Meta<any> = {
+            user:{
+                _id:"5a76b81f-fac2-472a-9ef6-87dd0d147a59"
+            },
+            params: listPostion
+        }
+        await MongoService._create("PostionStaff", ctxPosition);
         console.log(listPostion);
 
         let listName: string[] = data.name;
@@ -52,7 +58,15 @@ async function create() {
                 positionId: listPostion[Math.floor(Math.random() * listPostion.length - 2)]?._id
             })
         }
-        await MongoService._create("Staff", listStaff);
+
+
+        const ctxStaff : Meta<any> = {
+            user:{
+                _id:"5a76b81f-fac2-472a-9ef6-87dd0d147a59"
+            },
+            params: listStaff
+        }
+        await MongoService._create("Staff", ctxStaff);
         
         let getTypeCarName: string[] = data.nameTypeCar;
         let listTypeCar: TypeCar[] = [];
@@ -62,7 +76,14 @@ async function create() {
                 nameTypeCar: getTypeCarName[i]
             })
         }
-        await MongoService._create("TypeCar", listTypeCar);
+
+        const ctxTypeCar : Meta<any> = {
+            user:{
+                _id:"5a76b81f-fac2-472a-9ef6-87dd0d147a59"
+            },
+            params: listTypeCar
+        }
+        await MongoService._create("TypeCar", ctxTypeCar);
 
         
         let listCar: Car[] = [];
@@ -82,7 +103,14 @@ async function create() {
 
             })
         }
-        await MongoService._create("Car", listCar);
+
+        const ctxListCar : Meta<any> = {
+            user:{
+                _id:"5a76b81f-fac2-472a-9ef6-87dd0d147a59"
+            },
+            params: listCar
+        }
+        await MongoService._create("Car", ctxListCar);
         
         let listCustomer : Customer[] = []
         for (let i = 0; i < listName.length; i++) {
@@ -102,7 +130,13 @@ async function create() {
             
         }
 
-        await MongoService._create("Customer", listCustomer);
+        const ctxListCustomer : Meta<any> = {
+            user:{
+                _id:"5a76b81f-fac2-472a-9ef6-87dd0d147a59"
+            },
+            params: listCustomer
+        }
+        await MongoService._create("Customer", ctxListCustomer);
 
         //tạo chuyến đi 
         let listRouter: Route[] = []
@@ -119,7 +153,13 @@ async function create() {
             return router.localEnd != router.localStart
         })
 
-        await MongoService._create("Route", listRouter);
+        const ctxListRouter : Meta<any> = {
+            user:{
+                _id:"5a76b81f-fac2-472a-9ef6-87dd0d147a59"
+            },
+            params: listRouter
+        }
+        await MongoService._create("Route", ctxListRouter);
 
         const accoutn = {
                 staffId : listStaff[0]._id,
@@ -127,7 +167,13 @@ async function create() {
                 password : "123123",
         }
 
-        await AccountService.create(accoutn);
+        const ctxAccount : Meta<any> = {
+            user:{
+                _id:"5a76b81f-fac2-472a-9ef6-87dd0d147a59"
+            },
+            params: accoutn
+        }
+        await AccountService.create(ctxAccount);
 
         let dataChar: [] = [];
 
@@ -138,8 +184,13 @@ async function create() {
                 collumn: 4,
                 carId : listCar[i]._id
             } 
-
-            ChairService.autoCreate(chair);
+            const ctxChair : Meta<any> = {
+                user:{
+                    _id:"5a76b81f-fac2-472a-9ef6-87dd0d147a59"
+                },
+                params: chair
+            }
+            ChairService.autoCreate(ctxChair);
             
         }
 
