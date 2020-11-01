@@ -1,0 +1,10 @@
+{
+    "apps": [
+      {
+        "name": "vexedat",
+        "script": "ts-node",
+        "args": "src/main.ts"
+      }
+    ]
+  }
+  
