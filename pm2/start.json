@@ -1,7 +1,7 @@
 {
     "apps": [
       {
-        "name": "vexedat",
+        "name": "vexedat-backend",
         "script": "ts-node",
         "args": "src/main.ts"
       }
