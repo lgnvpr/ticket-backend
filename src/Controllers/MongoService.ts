@@ -86,8 +86,8 @@ export class MongoService {
         (page)
             ? getListData = await this.collection(collection).aggregate([
                 { $match: params },
-                { $sort: {createAt : 1}},
-                { $skip: page - 1 },
+                { $sort: {createAt : -1}},
+                { $skip: (page - 1)*6},
                 { $limit: 6 }
             ]).toArray() || []
 
@@ -100,7 +100,7 @@ export class MongoService {
         let pagingCollection: Paging<any> = {
             page: page,
             pageSize: getListData.length,
-            rows: getListData.reverse(),
+            rows: getListData,
             total: getCount,
             totalPages: Math.ceil(getCount / 6)
         }

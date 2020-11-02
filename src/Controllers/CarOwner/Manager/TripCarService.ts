@@ -25,28 +25,58 @@ export class TripCarService {
         };
         if (typeof ctx.params.params == "string") {
             queryByDate = JSON.parse(ctx.params.params);
+            ctx.params.params =  JSON.parse(ctx.params.params);
         }
 
         if (ctx.params.params) {
+
             let startDate = new Date(queryByDate.selectDate.fromDate);
+            if (ctx.params.params.selectDate.fromDate) {
+                startDate = new Date(queryByDate.selectDate.fromDate);
+            }
+            else {startDate = new Date();}
             startDate.setHours(0);
             startDate.setMinutes(0);
             startDate.setSeconds(0);
             startDate.setMilliseconds(0);
 
+            console.log("----------data of params---------------")
+            console.log(ctx.params.params)
+
             let endDate = new Date(queryByDate.selectDate.endDate);
+            if (ctx.params.params.selectDate.endDate) {
+                endDate = new Date(queryByDate.selectDate.endDate);
+            }
+            else { endDate = new Date(); }
+            
             endDate.setHours(0);
             endDate.setMinutes(0);
             endDate.setSeconds(0);
             endDate.setMilliseconds(0);
             endDate.setDate(endDate.getDate() + 1);
 
-            if (ctx.params.params.endDate) {
+            if ( ctx.params.params.selectDate.endDate) {
+                console.log("on from date and end date")
                 queryByDate = {
                     timeStart: { $gte: new Date(startDate), $lte: new Date(endDate) }
                 } as any
             }
+            else if (ctx.params.params.selectDate.fromDate) {
+                console.log("on from date")
+                queryByDate = {
+                    timeStart: { $gte: new Date(startDate)}
+                } as any
+            }
+                
+            else if (ctx.params.params.selectDate.endDate) {
+                console.log("on  end date")
+                queryByDate = {
+                    timeStart: { $lte: new Date(startDate)}
+                } as any
+            }
+
             else {
+                console.log("else")
                 queryByDate = {
                     timeStart: { $gte: new Date(startDate) }
                 } as any

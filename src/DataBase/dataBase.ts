@@ -32,6 +32,13 @@ export const randomBirthDay = (): Date => {
     return getDate;
 }
 
+export const randomHourAndMinute = (): Date => {
+    let getDate = new Date();
+    getDate.setHours(getDate.getHours() + Math.floor(Math.random() * 23));
+    getDate.setMinutes(0);
+    return getDate;
+}
+
 export const radomLicensePlates = (): string => {
     return `${Math.floor(Math.random() *90 +1)}A - ${1000+ Math.floor(Math.random() *8999)}`
 }
