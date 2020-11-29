@@ -84,15 +84,11 @@ export let postion = [
     "Nhân viên kiểm tra chất lượng", "Nhân viên dọn dẹp", "Nhân viên rửa xe", "Đội trưởng đội rửa xe"
 ]
 
-export let nameTypeCar = [
-    "Xe giuờng nằm cao cấp HuynhDai", "Xe đưa đón rung chuyển HuynhDai", "Xe giường nằm nhập khẩu đài loan", "Xe giường nằm 2 tầng", ""
-]
-
 export let country = [
     "Trung Quốc","Nhật Bản", "Hàn Quốc","Thái Lan", "Việt Nam"
 ]
 
-
+export const nameTypeCar =["", ""]
 
 
 

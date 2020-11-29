@@ -40,7 +40,7 @@ async function create() {
             },
             params: listPostion
         }
-        await MongoService._create("PostionStaff", ctxPosition);
+        await MongoService._create("PositionStaff", ctxPosition);
         console.log(listPostion);
 
         let listName: string[] = data.name;
